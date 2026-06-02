@@ -7,7 +7,6 @@ type Dashboard = {
   title: string;
   type: "native" | "powerbi";
   embed_url: string | null;
-  content: string | null;
 };
 
 export default async function DashboardPage({
@@ -21,7 +20,7 @@ export default async function DashboardPage({
   // RLS hace que un tablero sin permiso (o inactivo) simplemente no aparezca.
   const { data: dashboard } = await supabase
     .from("dashboards")
-    .select("slug, title, type, embed_url, content")
+    .select("slug, title, type, embed_url")
     .eq("slug", slug)
     .single<Dashboard>();
 
@@ -53,7 +52,7 @@ export default async function DashboardPage({
           />
         ) : (
           <iframe
-            srcDoc={dashboard.content ?? undefined}
+            src={`/d/${dashboard.slug}/raw`}
             title={dashboard.title}
             // Aislamos el contenido nativo: permitimos scripts pero NO
             // allow-same-origin, para que no acceda a las cookies ni al origen.

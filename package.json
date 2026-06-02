@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "crear-usuario": "tsx scripts/crear-usuario.ts"
+    "crear-usuario": "tsx scripts/crear-usuario.ts",
+    "cargar-tablero": "tsx scripts/cargar-tablero.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

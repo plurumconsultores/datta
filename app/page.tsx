@@ -25,6 +25,8 @@ export default async function Home() {
     redirect("/login");
   }
 
+  const { data: isAdmin } = await supabase.rpc("is_admin");
+
   // RLS ya filtra a los tableros permitidos y activos; no añadimos filtros aquí.
   const { data: dashboards } = await supabase
     .from("dashboards")
@@ -43,14 +45,25 @@ export default async function Home() {
           </span>
         </p>
 
-        <form action="/logout" method="post">
-          <button
-            type="submit"
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-          >
-            Cerrar sesión
-          </button>
-        </form>
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="rounded-md border border-black/15 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-white/15 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              Administración
+            </Link>
+          )}
+
+          <form action="/logout" method="post">
+            <button
+              type="submit"
+              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            >
+              Cerrar sesión
+            </button>
+          </form>
+        </div>
       </header>
 
       <main className="mx-auto w-full max-w-5xl px-6 py-10">
