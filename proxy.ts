@@ -8,7 +8,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * contacta al servidor de Supabase y valida el token. NO confiar solo en
  * `getSession()`, que lee la cookie sin validarla.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Respuesta base; se irá reemplazando si Supabase necesita refrescar cookies.
   let supabaseResponse = NextResponse.next({ request });
 
