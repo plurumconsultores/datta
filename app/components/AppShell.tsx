@@ -16,12 +16,15 @@ export function AppShell({
   active,
   isAdmin,
   userEmail,
+  headerSlot,
   children,
 }: {
   title: string;
   active: NavKey;
   isAdmin: boolean;
   userEmail: string | undefined;
+  /** Contenido opcional en la barra superior (p. ej. el filtro de clientes). */
+  headerSlot?: ReactNode;
   children: ReactNode;
 }) {
   const items = getNavItems(isAdmin);
@@ -70,6 +73,7 @@ export function AppShell({
             <h1 className="truncate text-base font-semibold text-ink">
               {title}
             </h1>
+            {headerSlot && <div className="ml-1 shrink-0">{headerSlot}</div>}
           </div>
 
           <div className="flex items-center gap-3">

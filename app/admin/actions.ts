@@ -21,6 +21,7 @@ function parseDashboardForm(formData: FormData):
   const embedUrl = String(formData.get("embed_url") ?? "").trim();
   const sortOrderRaw = String(formData.get("sort_order") ?? "").trim();
   const isActive = formData.get("is_active") != null;
+  const clienteIdRaw = String(formData.get("cliente_id") ?? "").trim();
 
   if (!slug || !title) {
     return { ok: false, error: "El slug y el título son obligatorios." };
@@ -52,6 +53,8 @@ function parseDashboardForm(formData: FormData):
       embed_url: type === "powerbi" ? embedUrl : null,
       sort_order: sortOrder,
       is_active: isActive,
+      // "Interno" (vacío) se guarda como null; si no, el id del cliente.
+      cliente_id: clienteIdRaw === "" ? null : clienteIdRaw,
     },
   };
 }
@@ -116,31 +119,4 @@ export async function deleteDashboard(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/");
   redirect("/admin");
-}
-
-/**
- * Asigna o quita un rol a un tablero (fila en role_dashboards).
- * Se invoca desde un checkbox en el cliente.
- */
-export async function setRoleDashboard(
-  dashboardId: string,
-  roleId: string,
-  enabled: boolean,
-) {
-  const { supabase } = await requireAdmin();
-
-  if (enabled) {
-    await supabase
-      .from("role_dashboards")
-      .insert({ dashboard_id: dashboardId, role_id: roleId });
-  } else {
-    await supabase
-      .from("role_dashboards")
-      .delete()
-      .eq("dashboard_id", dashboardId)
-      .eq("role_id", roleId);
-  }
-
-  revalidatePath("/admin");
-  revalidatePath("/");
 }

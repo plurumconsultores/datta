@@ -14,19 +14,21 @@ export type DashboardFormValues = {
   embed_url?: string | null;
   sort_order?: number;
   is_active?: boolean;
+  cliente_id?: string | null;
 };
 
 const inputClass =
-  "rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50";
-const labelClass =
-  "flex flex-col gap-1 text-sm font-medium text-zinc-700 dark:text-zinc-300";
+  "rounded-md border border-ink/15 bg-surface px-3 py-2 text-sm text-ink outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand-300/40";
+const labelClass = "flex flex-col gap-1 text-sm font-medium text-ink";
 
 export function DashboardForm({
   action,
+  clientes,
   initial = {},
   submitLabel,
 }: {
   action: (formData: FormData) => void | Promise<void>;
+  clientes: { id: string; nombre: string }[];
   initial?: DashboardFormValues;
   submitLabel: string;
 }) {
@@ -67,6 +69,22 @@ export function DashboardForm({
         />
       </label>
 
+      <label className={labelClass}>
+        Cliente
+        <select
+          name="cliente_id"
+          defaultValue={initial.cliente_id ?? ""}
+          className={inputClass}
+        >
+          <option value="">Interno</option>
+          {clientes.map((cliente) => (
+            <option key={cliente.id} value={cliente.id}>
+              {cliente.nombre}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <label className={labelClass}>
           Tipo
@@ -91,7 +109,7 @@ export function DashboardForm({
           />
         </label>
 
-        <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium text-ink">
           <input
             name="is_active"
             type="checkbox"
@@ -126,7 +144,7 @@ export function DashboardForm({
 
       <button
         type="submit"
-        className="w-fit rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+        className="w-fit rounded-md bg-brand-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
       >
         {submitLabel}
       </button>

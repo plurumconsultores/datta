@@ -18,7 +18,7 @@ export function UserRoleCheckbox({
   const [pending, startTransition] = useTransition();
 
   return (
-    <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+    <label className="flex items-center gap-2 text-sm text-ink">
       <input
         type="checkbox"
         checked={checked}

@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { setRoleDashboard } from "./actions";
+import { setUserCliente } from "./actions";
 
-export function RoleCheckbox({
-  dashboardId,
-  roleId,
+export function UserClienteCheckbox({
+  userId,
+  clienteId,
   label,
   initialChecked,
 }: {
-  dashboardId: string;
-  roleId: string;
+  userId: string;
+  clienteId: string;
   label: string;
   initialChecked: boolean;
 }) {
@@ -18,7 +18,7 @@ export function RoleCheckbox({
   const [pending, startTransition] = useTransition();
 
   return (
-    <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+    <label className="flex items-center gap-2 text-sm text-ink">
       <input
         type="checkbox"
         checked={checked}
@@ -28,7 +28,12 @@ export function RoleCheckbox({
           const next = e.target.checked;
           setChecked(next);
           startTransition(async () => {
-            await setRoleDashboard(dashboardId, roleId, next);
+            try {
+              await setUserCliente(userId, clienteId, next);
+            } catch (err) {
+              setChecked(!next);
+              alert(err instanceof Error ? err.message : "No se pudo guardar.");
+            }
           });
         }}
       />

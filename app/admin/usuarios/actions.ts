@@ -100,3 +100,31 @@ export async function setUserRole(
 
   revalidatePath(USERS_PATH);
 }
+
+/**
+ * Asigna o quita un cliente a un usuario (fila en usuario_clientes).
+ * Cliente de SERVIDOR normal: las políticas RLS de admin lo permiten.
+ * Se invoca desde un checkbox en el cliente.
+ */
+export async function setUserCliente(
+  targetUserId: string,
+  clienteId: string,
+  enabled: boolean,
+) {
+  const { supabase } = await requireAdmin();
+
+  if (enabled) {
+    await supabase
+      .from("usuario_clientes")
+      .insert({ user_id: targetUserId, cliente_id: clienteId });
+  } else {
+    await supabase
+      .from("usuario_clientes")
+      .delete()
+      .eq("user_id", targetUserId)
+      .eq("cliente_id", clienteId);
+  }
+
+  revalidatePath(USERS_PATH);
+  revalidatePath("/");
+}
