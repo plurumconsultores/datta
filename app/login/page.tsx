@@ -57,8 +57,9 @@ export default async function LoginPage({
 
         <div className="relative">
           <h2 className="text-5xl font-bold tracking-tight text-white">Datta</h2>
-          <p className="mt-3 max-w-xs text-lg text-brand-300">
-            Tus tableros de analítica, en un solo lugar.
+          <p className="mt-3 max-w-sm text-lg text-white">
+            Tus tableros de analítica, en{" "}
+            <span className="whitespace-nowrap">un solo lugar.</span>
           </p>
         </div>
       </div>

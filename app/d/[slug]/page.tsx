@@ -33,17 +33,21 @@ export default async function DashboardPage({
     <div className="flex h-screen flex-col bg-page">
       <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-ink/10 bg-surface px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex items-center justify-center rounded-lg border border-ink/10 bg-surface p-1.5">
+          <Link
+            href="/"
+            aria-label="Ir al inicio"
+            className="flex items-center justify-center rounded-lg border border-ink/10 bg-surface p-1.5 transition-colors hover:bg-page"
+          >
             <Image
               src="/PlurumLogo.svg"
-              alt="Plurum"
+              alt="Plurum — Inicio"
               width={117}
               height={47}
               priority
               unoptimized
               className="h-7 w-auto"
             />
-          </div>
+          </Link>
           <span className="hidden h-6 w-px bg-ink/15 sm:block" aria-hidden />
           <h1 className="truncate text-base font-semibold text-ink">
             {dashboard.title}

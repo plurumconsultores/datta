@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Plurum · Tableros",
+  title: "Datta",
   description: "Portal de tableros de Plurum",
 };
 
