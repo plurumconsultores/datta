@@ -42,6 +42,16 @@ export function AppShell({
           aria-label="Ir al inicio"
           className="flex h-16 shrink-0 items-center px-[14px]"
         >
+          {/* Colapsado: isotipo compacto. Expandido (hover): logo completo. */}
+          <Image
+            src="/plurum-isotipo-blanco.svg"
+            alt="Plurum"
+            width={95}
+            height={92}
+            priority
+            unoptimized
+            className="h-7 w-auto group-hover:hidden"
+          />
           <Image
             src="/plurum-blanco.svg"
             alt="Plurum"
@@ -49,7 +59,7 @@ export function AppShell({
             height={47}
             priority
             unoptimized
-            className="h-7 w-auto"
+            className="hidden h-7 w-auto group-hover:block"
           />
         </Link>
 
@@ -70,7 +80,7 @@ export function AppShell({
               <span className="flex h-8 w-8 shrink-0 items-center justify-center">
                 {item.icon}
               </span>
-              <span className="whitespace-nowrap text-sm font-medium">
+              <span className="invisible whitespace-nowrap text-sm font-medium opacity-0 transition-[opacity,visibility] duration-200 group-hover:visible group-hover:opacity-100">
                 {item.label}
               </span>
             </Link>
