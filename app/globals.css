@@ -1,26 +1,45 @@
 @import "tailwindcss";
 
+/*
+ * La identidad de Plurum es siempre clara. Atamos la variante `dark:` a una
+ * clase `.dark` (que nunca añadimos) para neutralizar el dark mode automático
+ * por prefers-color-scheme sin tener que editar cada componente.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Paleta de marca Plurum (azul) */
+  --brand-900: #005f95; /* predominante */
+  --brand-700: #0076b0;
+  --brand-500: #068aca;
+  --brand-400: #0da0e4;
+  --brand-300: #00b9ff;
+
+  /* Superficies y texto */
+  --page: #eef3f8; /* fondo de página claro */
+  --surface: #ffffff; /* tarjetas y barras */
+  --ink: #0b2b40; /* texto oscuro */
+  --muted: #5a7184; /* texto tenue */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-brand-900: var(--brand-900);
+  --color-brand-700: var(--brand-700);
+  --color-brand-500: var(--brand-500);
+  --color-brand-400: var(--brand-400);
+  --color-brand-300: var(--brand-300);
+
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }

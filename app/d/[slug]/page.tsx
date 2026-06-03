@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -29,17 +30,31 @@ export default async function DashboardPage({
   }
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-50 dark:bg-black">
-      <header className="flex items-center justify-between gap-4 border-b border-black/10 bg-white px-6 py-4 dark:border-white/10 dark:bg-zinc-900">
+    <div className="flex h-screen flex-col bg-page">
+      <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-ink/10 bg-surface px-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex items-center justify-center rounded-lg border border-ink/10 bg-surface p-1.5">
+            <Image
+              src="/PlurumLogo.svg"
+              alt="Plurum"
+              width={117}
+              height={47}
+              priority
+              unoptimized
+              className="h-7 w-auto"
+            />
+          </div>
+          <span className="hidden h-6 w-px bg-ink/15 sm:block" aria-hidden />
+          <h1 className="truncate text-base font-semibold text-ink">
+            {dashboard.title}
+          </h1>
+        </div>
         <Link
           href="/"
-          className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          className="shrink-0 rounded-md border border-brand-700 px-4 py-2 text-sm font-medium text-brand-700 transition-colors hover:bg-brand-700 hover:text-white"
         >
           ← Volver
         </Link>
-        <h1 className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-          {dashboard.title}
-        </h1>
       </header>
 
       <div className="flex-1 overflow-hidden">
