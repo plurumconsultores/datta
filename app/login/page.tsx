@@ -15,10 +15,20 @@ export default async function LoginPage({
     <div className="flex min-h-screen flex-col overflow-hidden md:flex-row">
       {/* Franja azul compacta (solo móvil) */}
       <div className="relative flex items-center gap-3 overflow-hidden bg-brand-900 px-5 py-6 md:hidden">
-        <div
+        {/* Imagen de fondo (cover) sobre el color --brand-900 */}
+        <Image
+          src="/loginazul.svg"
+          alt=""
           aria-hidden
-          className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-brand-700"
+          fill
+          priority
+          unoptimized
+          sizes="100vw"
+          className="object-cover object-center"
         />
+        {/* Overlay para contraste del texto */}
+        <div aria-hidden className="absolute inset-0 bg-brand-900/40" />
+
         <Image
           src="/plurum-blanco.svg"
           alt="Plurum"
@@ -33,15 +43,19 @@ export default async function LoginPage({
 
       {/* Columna izquierda de marca (desktop) */}
       <div className="relative hidden w-[46%] shrink-0 flex-col justify-between overflow-hidden bg-brand-900 p-10 text-white md:flex">
-        {/* Acentos planos, recortados por overflow-hidden */}
-        <div
+        {/* Imagen de fondo (cover) sobre el color --brand-900 */}
+        <Image
+          src="/loginazul.svg"
+          alt=""
           aria-hidden
-          className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand-700"
+          fill
+          priority
+          unoptimized
+          sizes="46vw"
+          className="object-cover object-center"
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-24 -left-12 h-60 w-60 rounded-full bg-brand-300/40"
-        />
+        {/* Overlay azul semitransparente para asegurar contraste del texto */}
+        <div aria-hidden className="absolute inset-0 bg-brand-900/40" />
 
         <div className="relative">
           <Image
