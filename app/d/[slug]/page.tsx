@@ -18,6 +18,14 @@ export default async function DashboardPage({
   const { slug } = await params;
 
   const supabase = await createClient();
+
+  // Email del usuario logueado para pasarlo al tablero nativo (campos de
+  // auditoría tipo "Creado por / Eliminado por"). Puede no venir, lo manejamos.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userEmail = user?.email;
+
   // RLS hace que un tablero sin permiso (o inactivo) simplemente no aparezca.
   const { data: dashboard } = await supabase
     .from("dashboards")
@@ -28,6 +36,11 @@ export default async function DashboardPage({
   if (!dashboard) {
     notFound();
   }
+
+  // Solo añadimos ?user= si hay correo; nunca metemos "undefined" en la URL.
+  const rawSrc = userEmail
+    ? `/d/${dashboard.slug}/raw?user=${encodeURIComponent(userEmail)}`
+    : `/d/${dashboard.slug}/raw`;
 
   return (
     <div className="flex h-screen flex-col bg-page">
@@ -71,7 +84,7 @@ export default async function DashboardPage({
           />
         ) : (
           <iframe
-            src={`/d/${dashboard.slug}/raw`}
+            src={rawSrc}
             title={dashboard.title}
             // Aislamos el contenido nativo: permitimos scripts pero NO
             // allow-same-origin, para que no acceda a las cookies ni al origen.
