@@ -4,10 +4,16 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 type Dashboard = {
+  id: string;
   slug: string;
   title: string;
   type: "native" | "powerbi";
   embed_url: string | null;
+};
+
+type PermisoTablero = {
+  variable: string;
+  valores: string[];
 };
 
 export default async function DashboardPage({
@@ -29,7 +35,7 @@ export default async function DashboardPage({
   // RLS hace que un tablero sin permiso (o inactivo) simplemente no aparezca.
   const { data: dashboard } = await supabase
     .from("dashboards")
-    .select("slug, title, type, embed_url")
+    .select("id, slug, title, type, embed_url")
     .eq("slug", slug)
     .single<Dashboard>();
 
@@ -37,10 +43,32 @@ export default async function DashboardPage({
     notFound();
   }
 
+  // Parámetros que se le pasan al tablero nativo dentro del iframe.
+  const rawParams = new URLSearchParams();
   // Solo añadimos ?user= si hay correo; nunca metemos "undefined" en la URL.
-  const rawSrc = userEmail
-    ? `/d/${dashboard.slug}/raw?user=${encodeURIComponent(userEmail)}`
-    : `/d/${dashboard.slug}/raw`;
+  if (userEmail) {
+    rawParams.set("user", userEmail);
+  }
+
+  // Permisos de filtrado del usuario para ESTE tablero (ej. regional, área).
+  // Sin filas -> sin restricción, se comporta igual que hoy. Solo aplica a
+  // tableros nativos: RLS impone que cada usuario solo vea sus propias filas.
+  if (dashboard.type === "native" && user) {
+    const { data: permisos } = await supabase
+      .from("permisos_tablero")
+      .select("variable, valores")
+      .eq("dashboard_id", dashboard.id)
+      .returns<PermisoTablero[]>();
+
+    for (const permiso of permisos ?? []) {
+      if (permiso.variable && permiso.valores?.length) {
+        rawParams.set(permiso.variable, permiso.valores.join(","));
+      }
+    }
+  }
+
+  const rawQuery = rawParams.toString();
+  const rawSrc = `/d/${dashboard.slug}/raw${rawQuery ? `?${rawQuery}` : ""}`;
 
   return (
     <div className="flex h-screen flex-col bg-page">
