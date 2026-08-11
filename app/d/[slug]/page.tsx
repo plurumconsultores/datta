@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 type Dashboard = {
-  id: string;
+  id: number;
   slug: string;
   title: string;
   type: "native" | "powerbi";

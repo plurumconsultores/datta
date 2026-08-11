@@ -25,7 +25,7 @@
 create table if not exists public.permisos_tablero (
   id           uuid primary key default gen_random_uuid(),
   user_id      uuid not null references auth.users (id) on delete cascade,
-  dashboard_id uuid not null references public.dashboards (id) on delete cascade,
+  dashboard_id bigint not null references public.dashboards (id) on delete cascade,
   variable     text not null,
   valores      text[] not null,
   created_at   timestamptz not null default now(),
