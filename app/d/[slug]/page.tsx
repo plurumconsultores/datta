@@ -88,7 +88,7 @@ export default async function DashboardPage({
             title={dashboard.title}
             // Aislamos el contenido nativo: permitimos scripts pero NO
             // allow-same-origin, para que no acceda a las cookies ni al origen.
-            sandbox="allow-scripts allow-same-origin"
+            sandbox="allow-scripts allow-same-origin allow-downloads"
             className="h-full w-full border-0 bg-white"
           />
         )}
