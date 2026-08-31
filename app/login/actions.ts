@@ -5,7 +5,11 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export async function login(formData: FormData) {
-  const email = String(formData.get("email") ?? "");
+  // Se normaliza el email (espacios invisibles del autocompletado o del
+  // copiar/pegar hacen que no coincida y Supabase responda
+  // "Invalid login credentials"). La contraseña NO se toca: los espacios
+  // pueden ser parte legítima de la clave.
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
   const supabase = await createClient();
