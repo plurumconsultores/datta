@@ -6,7 +6,8 @@ import { NextResponse } from "next/server";
  * La consume el tablero nativo (servido en /d/<slug>/raw, mismo origen),
  * así que las cookies de sesión viajan solas y RLS impone los permisos.
  *
- *  GET     -> { admin, correo, filas, movs }
+ *  GET            -> { admin, correo, filas, movs }
+ *  GET ?resumen=1 -> { admin, resumen }   (lo que consume la carrera)
  *  POST    -> agrega un registro     (solo admin)
  *  PATCH   -> edita un registro      (solo admin)
  *  DELETE  -> borra un registro      (solo admin)
@@ -29,9 +30,16 @@ async function contexto() {
   return { supabase, user, admin: data === true };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const { supabase, user, admin } = await contexto();
   if (!user) return NextResponse.json({ admin: false }, { status: 401 });
+
+  // ?resumen=1 -> solo los conteos que dibuja la carrera (sin datos individuales).
+  // Así el tablero no necesita llevar llaves de Supabase dentro del HTML.
+  if (new URL(request.url).searchParams.has("resumen")) {
+    const { data } = await supabase.rpc("radar_resumen");
+    return NextResponse.json({ admin, resumen: data ?? {} });
+  }
 
   const { data: filas } = await supabase
     .from("respuestas_radar")
