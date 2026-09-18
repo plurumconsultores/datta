@@ -13,7 +13,7 @@ import { NextResponse } from "next/server";
  *  DELETE  -> borra un registro      (solo admin)
  */
 
-const CAMPOS = "id,creado_en,filial,genero,estado,origen,nota";
+const CAMPOS = "id,creado_en,filial,genero,estado,origen,nota,respuestas";
 const CAMPOS_LOG = "id,ocurrido_en,actor_email,accion,registro_id,antes,despues";
 
 const FILIALES = ["TGI", "Enlaza", "Corporativa"];
