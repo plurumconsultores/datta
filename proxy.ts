@@ -39,7 +39,8 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Rutas públicas que no requieren sesión.
-  const isPublic = request.nextUrl.pathname.startsWith("/login");
+  const isPublic = request.nextUrl.pathname.startsWith("/login")
+    || request.nextUrl.pathname.startsWith("/e/");
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
