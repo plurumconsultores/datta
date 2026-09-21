@@ -61,12 +61,16 @@ export function DashboardForm({
       </div>
 
       <label className={labelClass}>
-        Descripción
+        Descripción <span className="font-normal text-muted">(opcional)</span>
         <input
           name="description"
           defaultValue={initial.description ?? ""}
+          placeholder="Una línea sobre de qué trata el tablero"
           className={inputClass}
         />
+        <span className="text-xs font-normal text-muted">
+          Si la dejas vacía, la tarjeta del portal muestra solo el título.
+        </span>
       </label>
 
       <label className={labelClass}>

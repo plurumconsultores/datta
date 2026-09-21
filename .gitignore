@@ -50,3 +50,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Respaldos locales de cambios (ver respaldos/LEEME.md)
+respaldos/
