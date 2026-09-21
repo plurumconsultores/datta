@@ -1,4 +1,5 @@
-import Link from "next/link";
+"use client";
+
 import { ClienteLogo } from "./ClienteLogo";
 
 export type OpcionCliente = {
@@ -11,16 +12,18 @@ export type OpcionCliente = {
 };
 
 /**
- * Filtro de clientes del portal: una fila de chips con logo y conteo. La
- * selección viaja en la URL (/?cliente=<id>), así sobrevive a entrar a un
- * tablero y volver, y el enlace se puede compartir.
+ * Filtro de clientes del portal: una fila de chips con logo y conteo. Filtra en
+ * el navegador, sin esperar al servidor, y quien lo pulsa deja la selección
+ * escrita en la URL (/?cliente=<id>) para poder compartir el enlace.
  */
 export function ClienteChips({
   opciones,
   seleccionado,
+  onSelect,
 }: {
   opciones: OpcionCliente[];
   seleccionado: string;
+  onSelect: (valor: string) => void;
 }) {
   // "Todos" + un solo grupo: no hay nada que filtrar.
   if (opciones.length <= 2) return null;
@@ -29,15 +32,13 @@ export function ClienteChips({
     <nav aria-label="Filtrar por cliente" className="flex flex-wrap items-center gap-2">
       {opciones.map((opcion) => {
         const activo = opcion.value === seleccionado;
-        const href =
-          opcion.value === "todos" ? "/" : `/?cliente=${encodeURIComponent(opcion.value)}`;
 
         return (
-          <Link
+          <button
             key={opcion.value}
-            href={href}
-            scroll={false}
-            aria-current={activo ? "page" : undefined}
+            type="button"
+            onClick={() => onSelect(opcion.value)}
+            aria-pressed={activo}
             className={`flex items-center gap-2 rounded-full py-1.5 pl-3 pr-3.5 text-sm font-medium transition-colors ${
               activo
                 ? "bg-brand-900 text-white"
@@ -53,7 +54,7 @@ export function ClienteChips({
               />
             )}
             {opcion.label} · {opcion.count}
-          </Link>
+          </button>
         );
       })}
     </nav>

@@ -128,7 +128,7 @@ export default async function Home({
     title: d.title,
     description: d.description,
     type: d.type,
-    cliente_id: d.cliente_id,
+    cliente_id: d.cliente_id === null || d.cliente_id === undefined ? null : String(d.cliente_id),
     actualizado: formatoActualizado(d.updated_at),
   }));
 
@@ -138,7 +138,7 @@ export default async function Home({
     ...clientes
       .filter((cliente) => items.some((d) => d.cliente_id === cliente.id))
       .map((cliente) => ({
-        value: cliente.id,
+        value: String(cliente.id),
         nombre: cliente.nombre,
         logo: urlLogo(cliente.logo_path),
         color: colorCliente(cliente.color_hex),

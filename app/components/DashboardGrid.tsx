@@ -50,6 +50,24 @@ export function DashboardGrid({
 }) {
   const [busqueda, setBusqueda] = useState("");
   const [fijados, setFijados] = useState<string[]>([]);
+  // El cliente elegido se maneja aquí: filtra al instante y de paso deja la
+  // selección en la URL, sin depender de que el servidor vuelva a responder.
+  const [cliente, setCliente] = useState(seleccionado);
+
+  useEffect(() => {
+    setCliente(seleccionado);
+  }, [seleccionado]);
+
+  function elegirCliente(valor: string) {
+    setCliente(valor);
+    try {
+      const url =
+        valor === "todos" ? "/" : `/?cliente=${encodeURIComponent(valor)}`;
+      window.history.replaceState(null, "", url);
+    } catch {
+      // Si el navegador no deja tocar la URL, el filtro igual funciona.
+    }
+  }
 
   // Los fijados viven en el navegador de cada quien: se leen después de montar
   // para que el HTML del servidor y el del cliente coincidan.
@@ -90,7 +108,7 @@ export function DashboardGrid({
 
   const visibles = dashboards.filter((dashboard) => {
     const grupo = dashboard.cliente_id ?? "internos";
-    if (seleccionado !== "todos" && grupo !== seleccionado) return false;
+    if (cliente !== "todos" && grupo !== cliente) return false;
     if (!termino) return true;
     const texto = normalizar(
       `${dashboard.title} ${dashboard.description ?? ""} ${nombrePorGrupo.get(grupo) ?? ""}`,
@@ -130,20 +148,27 @@ export function DashboardGrid({
           </span>
         </div>
 
-        <ClienteChips opciones={opciones} seleccionado={seleccionado} />
+        <ClienteChips
+          opciones={opciones}
+          seleccionado={cliente}
+          onSelect={elegirCliente}
+        />
       </div>
 
       {visibles.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-ink/15 bg-surface px-6 py-16 text-center">
           <p className="text-muted">No hay tableros para esta búsqueda</p>
-          {(termino || seleccionado !== "todos") && (
-            <Link
-              href="/"
-              onClick={() => setBusqueda("")}
+          {(termino || cliente !== "todos") && (
+            <button
+              type="button"
+              onClick={() => {
+                setBusqueda("");
+                elegirCliente("todos");
+              }}
               className="rounded-md border border-brand-700 px-3 py-1.5 text-sm font-medium text-brand-700 transition-colors hover:bg-brand-700 hover:text-white"
             >
               Quitar filtros
-            </Link>
+            </button>
           )}
         </div>
       ) : (
