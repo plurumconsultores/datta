@@ -12,7 +12,8 @@ export type DashboardCard = {
   title: string;
   description: string | null;
   type: "native" | "powerbi";
-  cliente_id: string | null;
+  /** Id del cliente, "internos" o "otros". Lo calcula el servidor. */
+  grupo: string;
   /** Texto ya armado en el servidor: "Actualizado ayer", etc. */
   actualizado: string | null;
 };
@@ -107,7 +108,7 @@ export function DashboardGrid({
   const termino = normalizar(busqueda.trim());
 
   const visibles = dashboards.filter((dashboard) => {
-    const grupo = dashboard.cliente_id ?? "internos";
+    const grupo = dashboard.grupo;
     if (cliente !== "todos" && grupo !== cliente) return false;
     if (!termino) return true;
     const texto = normalizar(
@@ -186,9 +187,7 @@ export function DashboardGrid({
                   <Tarjeta
                     key={`fijado-${dashboard.id}`}
                     dashboard={dashboard}
-                    grupo={grupos.find(
-                      (g) => g.value === (dashboard.cliente_id ?? "internos"),
-                    )}
+                    grupo={grupos.find((g) => g.value === dashboard.grupo)}
                     fijado
                     onFijar={alternarFijado}
                   />
@@ -198,9 +197,7 @@ export function DashboardGrid({
           )}
 
           {grupos.map((grupo) => {
-            const items = visibles.filter(
-              (d) => (d.cliente_id ?? "internos") === grupo.value,
-            );
+            const items = visibles.filter((d) => d.grupo === grupo.value);
             if (items.length === 0) return null;
 
             return (

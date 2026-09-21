@@ -122,21 +122,33 @@ export default async function Home({
     })(),
   ]);
 
+  // Ids de los clientes que la consulta devolvió. Un tablero que apunte a un
+  // cliente fuera de esa lista (inactivo, o que RLS no deja ver) no puede
+  // quedarse sin sección: cae en "Otros tableros".
+  const idsVisibles = new Set(clientes.map((cliente) => String(cliente.id)));
+
+  function grupoDe(clienteId: string | null | undefined): string {
+    if (clienteId === null || clienteId === undefined) return "internos";
+    const id = String(clienteId);
+    return idsVisibles.has(id) ? id : "otros";
+  }
+
   const items: DashboardCard[] = dashboards.map((d) => ({
     id: d.id,
     slug: d.slug,
     title: d.title,
     description: d.description,
     type: d.type,
-    cliente_id: d.cliente_id === null || d.cliente_id === undefined ? null : String(d.cliente_id),
+    grupo: grupoDe(d.cliente_id),
     actualizado: formatoActualizado(d.updated_at),
   }));
 
-  const hayInternos = items.some((d) => d.cliente_id === null);
+  const hayInternos = items.some((d) => d.grupo === "internos");
+  const hayOtros = items.some((d) => d.grupo === "otros");
 
   const grupos: GrupoCliente[] = [
     ...clientes
-      .filter((cliente) => items.some((d) => d.cliente_id === cliente.id))
+      .filter((cliente) => items.some((d) => d.grupo === String(cliente.id)))
       .map((cliente) => ({
         value: String(cliente.id),
         nombre: cliente.nombre,
@@ -155,6 +167,17 @@ export default async function Home({
           },
         ]
       : []),
+    ...(hayOtros
+      ? [
+          {
+            value: "otros",
+            nombre: "Otros tableros",
+            logo: null,
+            color: COLOR_PLURUM,
+            tinte: tinteCliente(COLOR_PLURUM, OPACIDAD_POR_DEFECTO),
+          },
+        ]
+      : []),
   ];
 
   const opciones: OpcionCliente[] = [
@@ -162,7 +185,7 @@ export default async function Home({
     ...grupos.map((grupo) => ({
       value: grupo.value,
       label: grupo.nombre,
-      count: items.filter((d) => (d.cliente_id ?? "internos") === grupo.value).length,
+      count: items.filter((d) => d.grupo === grupo.value).length,
       logo: grupo.logo,
       color: grupo.color,
     })),
