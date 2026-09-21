@@ -36,7 +36,7 @@ export function AppShell({
         el mouse se expande (overlay, z alto) revelando las etiquetas sin que el
         contenido salte. Fijo y de alto completo.
       */}
-      <aside className="group fixed inset-y-0 left-0 z-50 hidden w-[60px] flex-col overflow-hidden bg-brand-900 transition-[width] duration-200 ease-out hover:w-56 hover:shadow-xl sm:flex">
+      <aside className="rail-marca group fixed inset-y-0 left-0 z-50 hidden w-[60px] flex-col overflow-hidden transition-[width] duration-200 ease-out hover:w-56 hover:shadow-xl sm:flex">
         <Link
           href="/"
           aria-label="Ir al inicio"
@@ -131,6 +131,9 @@ export function AppShell({
             </form>
           </div>
         </header>
+
+        {/* Franja con los cuatro colores de Plurum */}
+        <div className="franja-marca" aria-hidden />
 
         <main className="min-w-0 flex-1">{children}</main>
       </div>

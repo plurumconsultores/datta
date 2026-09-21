@@ -9,7 +9,7 @@ export function ClienteLogo({
   nombre,
   logo,
   color,
-  tamano = 30,
+  tamano = 44,
 }: {
   nombre: string;
   logo: string | null;
@@ -23,8 +23,9 @@ export function ClienteLogo({
         src={logo}
         alt=""
         aria-hidden
-        style={{ height: tamano }}
-        className="w-auto max-w-[130px] shrink-0 object-contain"
+        // Alto fijo y ancho libre: sirve igual para logos cuadrados y alargados.
+        style={{ height: tamano, maxWidth: tamano * 5 }}
+        className="w-auto shrink-0 object-contain"
       />
     );
   }
@@ -33,7 +34,7 @@ export function ClienteLogo({
     <span
       aria-hidden
       style={{ width: tamano, height: tamano, backgroundColor: colorCliente(color) }}
-      className="flex shrink-0 items-center justify-center rounded-lg text-[11px] font-bold leading-none text-white"
+      className="flex shrink-0 items-center justify-center rounded-xl text-sm font-bold leading-none text-white"
     >
       {inicialesCliente(nombre)}
     </span>

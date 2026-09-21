@@ -56,13 +56,13 @@ export function IdentidadCliente({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end gap-5">
         <div className="flex flex-col items-center gap-2">
-          <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-xl border border-ink/10 bg-page">
+          <div className="flex h-24 w-32 items-center justify-center overflow-hidden rounded-xl border border-ink/10 bg-page">
             {vistaPrevia && !quitar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={vistaPrevia}
                 alt={`Logo de ${nombre}`}
-                className="h-full w-full object-contain p-1.5"
+                className="h-full w-full object-contain p-2"
               />
             ) : (
               <span
@@ -141,11 +141,11 @@ export function IdentidadCliente({
         <div className="flex flex-wrap items-center gap-3">
           {vistaPrevia && !quitar ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={vistaPrevia} alt="" aria-hidden className="h-7 w-auto max-w-[120px] object-contain" />
+            <img src={vistaPrevia} alt="" aria-hidden className="h-11 w-auto max-w-[200px] object-contain" />
           ) : (
             <span
               style={{ backgroundColor: color }}
-              className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[11px] font-bold text-white"
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold text-white"
             >
               {inicialesCliente(nombre)}
             </span>

@@ -8,26 +8,40 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* Paleta de marca Plurum (azul) */
-  --brand-900: #005f95; /* predominante */
-  --brand-700: #0076b0;
-  --brand-500: #068aca;
-  --brand-400: #0da0e4;
-  --brand-300: #00b9ff;
+  /*
+   * Paleta de marca Plurum. Los cuatro colores de la marca son
+   * #487629 (verde), #80BC00 (lima), #FFA000 (ámbar) y #23E8E8 (cian).
+   * brand-900 es el predominante y el único con texto blanco encima;
+   * brand-700 es su versión oscura, para hover y para texto sobre claro.
+   */
+  --brand-900: #487629; /* predominante */
+  --brand-700: #3b6220; /* hover y texto sobre fondo claro */
+  --brand-800: #2e4d18; /* fondo del degradado lateral */
+  --brand-500: #649914;
+  --brand-400: #80bc00; /* lima: realces y bordes vivos */
+  --brand-300: #23e8e8; /* cian: anillos de foco */
+
+  /* Acentos */
+  --accent: #ffa000; /* ámbar: fijados */
+  --cian: #23e8e8;
 
   /* Superficies y texto */
-  --page: #eef3f8; /* fondo de página claro */
+  --page: #f2f5ee; /* fondo de página claro */
   --surface: #ffffff; /* tarjetas y barras */
-  --ink: #0b2b40; /* texto oscuro */
-  --muted: #5a7184; /* texto tenue */
+  --ink: #1b2a17; /* texto oscuro */
+  --muted: #556550; /* texto tenue (5.2:1 sobre blanco) */
 }
 
 @theme inline {
   --color-brand-900: var(--brand-900);
+  --color-brand-800: var(--brand-800);
   --color-brand-700: var(--brand-700);
   --color-brand-500: var(--brand-500);
   --color-brand-400: var(--brand-400);
   --color-brand-300: var(--brand-300);
+
+  --color-accent: var(--accent);
+  --color-cian: var(--cian);
 
   --color-page: var(--page);
   --color-surface: var(--surface);
@@ -81,4 +95,36 @@ body {
   .grupo-cliente::before {
     transition: none;
   }
+}
+
+/*
+ * Degradados de marca. La barra lateral baja del verde predominante al más
+ * oscuro; la franja del encabezado recorre los cuatro colores de Plurum.
+ */
+.rail-marca {
+  background: linear-gradient(
+    180deg,
+    var(--brand-900) 0%,
+    var(--brand-700) 58%,
+    var(--brand-800) 100%
+  );
+}
+
+.franja-marca {
+  height: 3px;
+  flex-shrink: 0;
+  background: linear-gradient(
+    90deg,
+    var(--brand-900) 0%,
+    var(--brand-400) 38%,
+    var(--accent) 68%,
+    var(--cian) 100%
+  );
+}
+
+.degradado-login {
+  background:
+    radial-gradient(120% 90% at 85% 10%, rgba(35, 232, 232, 0.28), transparent 60%),
+    radial-gradient(90% 80% at 10% 95%, rgba(128, 188, 0, 0.35), transparent 62%),
+    linear-gradient(155deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-800) 100%);
 }

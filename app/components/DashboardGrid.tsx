@@ -177,7 +177,7 @@ export function DashboardGrid({
           {fijadosVisibles.length > 0 && (
             <section className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
-                <IconoEstrella relleno className="h-4 w-4 text-brand-900" />
+                <IconoEstrella relleno className="h-4 w-4 text-accent" />
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
                   Fijados
                 </h2>
@@ -211,7 +211,7 @@ export function DashboardGrid({
                     nombre={grupo.nombre}
                     logo={grupo.logo}
                     color={grupo.color}
-                    tamano={30}
+                    tamano={44}
                   />
                   <h2 className="text-base font-bold text-ink">{grupo.nombre}</h2>
                   <span className="text-sm text-muted">
@@ -272,7 +272,7 @@ function Tarjeta({
           aria-pressed={fijado}
           aria-label={fijado ? "Quitar de fijados" : "Fijar tablero"}
           className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-page ${
-            fijado ? "text-brand-900" : "text-muted"
+            fijado ? "text-accent" : "text-muted"
           }`}
         >
           <IconoEstrella relleno={fijado} className="h-[18px] w-[18px]" />

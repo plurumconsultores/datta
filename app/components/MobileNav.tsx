@@ -38,7 +38,7 @@ export function MobileNav({
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-ink/40"
           />
-          <nav className="absolute left-0 top-0 flex h-full w-64 flex-col bg-brand-900">
+          <nav className="rail-marca absolute left-0 top-0 flex h-full w-64 flex-col">
             <div className="flex h-16 items-center justify-between gap-2 px-4">
               <Link href="/" onClick={() => setOpen(false)} aria-label="Ir al inicio">
                 <Image

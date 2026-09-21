@@ -14,7 +14,7 @@ export default async function LoginPage({
   return (
     <div className="flex min-h-screen flex-col overflow-hidden md:flex-row">
       {/* Franja azul compacta (solo móvil) */}
-      <div className="relative flex items-center gap-3 overflow-hidden bg-brand-900 px-5 py-6 md:hidden">
+      <div className="degradado-login relative flex items-center gap-3 overflow-hidden px-5 py-6 md:hidden">
         {/* Imagen de fondo (cover) sobre el color --brand-900 */}
         <Image
           src="/loginazul.svg"
@@ -24,10 +24,10 @@ export default async function LoginPage({
           priority
           unoptimized
           sizes="100vw"
-          className="object-cover object-center"
+          className="object-cover object-center opacity-35 mix-blend-luminosity"
         />
         {/* Overlay para contraste del texto */}
-        <div aria-hidden className="absolute inset-0 bg-brand-900/40" />
+        <div aria-hidden className="absolute inset-0 bg-brand-800/25" />
 
         <Image
           src="/plurum-blanco.svg"
@@ -42,7 +42,7 @@ export default async function LoginPage({
       </div>
 
       {/* Columna izquierda de marca (desktop) */}
-      <div className="relative hidden w-[46%] shrink-0 flex-col justify-between overflow-hidden bg-brand-900 p-10 text-white md:flex">
+      <div className="degradado-login relative hidden w-[46%] shrink-0 flex-col justify-between overflow-hidden p-10 text-white md:flex">
         {/* Imagen de fondo (cover) sobre el color --brand-900 */}
         <Image
           src="/loginazul.svg"
@@ -52,10 +52,10 @@ export default async function LoginPage({
           priority
           unoptimized
           sizes="46vw"
-          className="object-cover object-center"
+          className="object-cover object-center opacity-35 mix-blend-luminosity"
         />
         {/* Overlay azul semitransparente para asegurar contraste del texto */}
-        <div aria-hidden className="absolute inset-0 bg-brand-900/40" />
+        <div aria-hidden className="absolute inset-0 bg-brand-800/25" />
 
         <div className="relative">
           <Image

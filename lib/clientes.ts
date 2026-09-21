@@ -7,8 +7,8 @@
 /** Bucket público de Supabase Storage donde se guardan los logos. */
 export const BUCKET_LOGOS = "clientes-logos";
 
-/** Azul Plurum: lo usan los tableros internos y los clientes sin color. */
-export const COLOR_PLURUM = "#005F95";
+/** Verde Plurum: lo usan los tableros internos y los clientes sin color. */
+export const COLOR_PLURUM = "#487629";
 
 /** Transparencia por defecto del difuminado, en porcentaje. */
 export const OPACIDAD_POR_DEFECTO = 15;

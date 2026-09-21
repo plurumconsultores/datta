@@ -39,7 +39,7 @@ export function ClienteChips({
             type="button"
             onClick={() => onSelect(opcion.value)}
             aria-pressed={activo}
-            className={`flex items-center gap-2 rounded-full py-1.5 pl-3 pr-3.5 text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 rounded-full py-1.5 pl-2.5 pr-3.5 text-sm font-medium transition-colors ${
               activo
                 ? "bg-brand-900 text-white"
                 : "border border-ink/15 bg-surface text-ink hover:bg-page"
@@ -50,7 +50,7 @@ export function ClienteChips({
                 nombre={opcion.label}
                 logo={opcion.logo}
                 color={opcion.color}
-                tamano={18}
+                tamano={24}
               />
             )}
             {opcion.label} · {opcion.count}
