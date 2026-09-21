@@ -30,6 +30,29 @@ async function contexto() {
   return { supabase, user, admin: data === true };
 }
 
+/**
+ * Trae TODAS las filas por páginas. PostgREST devuelve como máximo 1.000 por
+ * llamada, así que con bases grandes (la feria puede pasar de 1.000 respuestas)
+ * una sola consulta se quedaría corta sin avisar.
+ */
+type Cliente = Awaited<ReturnType<typeof createClient>>;
+async function todasLasFilas(supabase: Cliente) {
+  const PASO = 1000;
+  const TOPE = 50000;
+  const filas: Record<string, unknown>[] = [];
+  for (let desde = 0; desde < TOPE; desde += PASO) {
+    const { data, error } = await supabase
+      .from("respuestas_radar")
+      .select(CAMPOS)
+      .order("id", { ascending: false })
+      .range(desde, desde + PASO - 1);
+    if (error || !data || data.length === 0) break;
+    filas.push(...data);
+    if (data.length < PASO) break;
+  }
+  return filas;
+}
+
 export async function GET(request: Request) {
   const { supabase, user, admin } = await contexto();
   if (!user) return NextResponse.json({ admin: false }, { status: 401 });
@@ -41,17 +64,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ admin, resumen: data ?? {} });
   }
 
-  const { data: filas } = await supabase
-    .from("respuestas_radar")
-    .select(CAMPOS)
-    .order("id", { ascending: false })
-    .limit(500);
+  const filas = await todasLasFilas(supabase);
 
   const { data: movs } = await supabase
     .from("respuestas_radar_log")
     .select(CAMPOS_LOG)
     .order("id", { ascending: false })
-    .limit(200);
+    .limit(1000);
 
   return NextResponse.json({
     admin,
