@@ -142,7 +142,9 @@ const SUPABASE_ANON_KEY = "sb_publishable_2M-S4-vlgk_3pR90lmc6Zg_GOkKwMnc";   //
 
 const FILIALES = ["TGI","Enlaza","Corporativa"];
 const GENEROS  = ["Masculino","Femenino","Otro"];
-const LETRA_ESTADO = {A:"Prisa", B:"Frustración", C:"Complacencia", D:"Fatiga"};
+const LETRA_ESTADO = {A:"Prisa", B:"Frustración", C:"Complacencia", D:"Fatiga", E:"Complacencia"};
+const ESTADOS = ["Prisa","Frustración","Complacencia","Fatiga"];
+const NINGUNA = "Ninguna de las anteriores.";
 
 const PREGUNTAS = [
  ["Cuando el trabajo se retrasa por un imprevisto:",
@@ -191,6 +193,7 @@ const PREGUNTAS = [
    "Pienso que es normal, a todos nos pasa, y sigo adelante.",
    "Me desanimo y siento que es un esfuerzo perdido intentar mejorar."]]
 ];
+PREGUNTAS.forEach(p=>{ if(p[1][p[1].length-1]!==NINGUNA) p[1].push(NINGUNA); });
 
 const FRASE = {
  "Prisa":"Tu atención está en el futuro, no en el presente.",
@@ -209,26 +212,42 @@ const CONSEJOS = {
    "Llegar a tiempo nunca vale más que volver a casa. Planea tu tarea con margen.",
    "Si sientes que el reloj te empuja, di en voz alta el siguiente paso antes de hacerlo.",
    "Las verificaciones no son opcionales: son las que te devuelven a casa.",
-   "Cuando el tiempo no alcance, pide apoyo o renegocia el plazo."],
+   "Cuando el tiempo no alcance, pide apoyo o renegocia el plazo.",
+   "Mente en la tarea de ahora, no en todo lo que falta.",
+   "Si vas demasiado rápido, respira; pausar protegerá tu buen trabajo.",
+   "Evita los atajos: cuidar el proceso protege tus buenos resultados.",
+   "Ante la urgencia, pausa y prioriza; si te supera, pide ayuda."],
  "Frustración":["Cuando algo no sale como esperas, respira antes de reaccionar.",
    "Una pausa corta hoy evita un error grande mañana.",
    "Conversa lo que te molesta con respeto: lo que no se resuelve, distrae.",
    "Busca la solución, no al culpable.",
-   "Si la tensión sube, amplía la mirada y revisa tu entorno antes de seguir."],
+   "Si la tensión sube, amplía la mirada y revisa tu entorno antes de seguir.",
+   "Ponle nombre a lo que sientes: así la emoción no decide por ti.",
+   "Elige escuchar antes de discutir; la empatía desarma los conflictos.",
+   "Si el problema te nubla, pide otras opiniones para ampliar tu perspectiva.",
+   "Aprende a decir no cuando tu capacidad de trabajo esté al límite."],
  "Fatiga":["Descansar también es parte de trabajar seguro.",
    "Haz pausas activas: hidrátate y mueve el cuerpo.",
    "Si te cuesta concentrarte, avisa y rota la tarea.",
    "Cuida tu sueño: dormir bien es tu primera protección.",
-   "En tareas críticas, pide que un compañero verifique contigo."],
+   "En tareas críticas, pide que un compañero verifique contigo.",
+   "Ajusta el ritmo a tu energía a lo largo de la jornada.",
+   "Descansa mínimo siete horas para recuperar tu energía plena.",
+   "Come e hidrátate cada tres o cuatro horas: evita caídas de energía y mejora la concentración.",
+   "Abre espacios diarios para desconectar del trabajo con pasatiempos breves que relajen tu mente."],
  "Complacencia":["Haz cada tarea como si fuera la primera vez.",
    "Lo conocido también cambia: revisa antes de asumir.",
    "Apaga el piloto automático: busca un detalle nuevo en tu entorno.",
    "Los atajos de hoy son los incidentes de mañana.",
-   "Completa la lista de chequeo, aunque la sepas de memoria."]
+   "Completa la lista de chequeo, aunque la sepas de memoria.",
+   "Pregúntate siempre: ¿qué podría salir mal esta vez?",
+   "Evita el exceso de confianza: verifica tus tareas paso a paso.",
+   "Pide retroalimentación frecuente para descubrir puntos ciegos y seguir mejorando.",
+   "Busca aprender algo diferente cada semana para desactivar el piloto automático."]
 };
 /* ================================================= */
 
-const LETRAS=["A","B","C","D"];
+const LETRAS=["A","B","C","D","E"];
 const T=document.getElementById("tarjeta"), BARRA=document.getElementById("barra"), PASO=document.getElementById("paso");
 let filial=null, genero=null, resp=new Array(PREGUNTAS.length).fill(null), i=-1, empatados=null;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -280,11 +299,13 @@ function pregunta(){
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-const conteo=()=>{const c={A:0,B:0,C:0,D:0};resp.forEach(l=>{if(l)c[l]++});return c};
+const conteo=()=>{const c={A:0,B:0,C:0,D:0,E:0};resp.forEach(l=>{if(l)c[l]++});return c};
+const conteoEstado=()=>{const c=conteo(),e={};ESTADOS.forEach(x=>e[x]=0);
+  LETRAS.forEach(l=>{e[LETRA_ESTADO[l]]+=c[l]});return e};
 
 function cerrar(){
-  const c=conteo(), mx=Math.max(...Object.values(c));
-  const top=LETRAS.filter(l=>c[l]===mx).map(l=>LETRA_ESTADO[l]);
+  const e=conteoEstado(), mx=Math.max(...ESTADOS.map(x=>e[x]));
+  const top=ESTADOS.filter(x=>e[x]===mx);
   top.length>1 ? (empatados=top, desempate()) : resultado(top[0]);
 }
 
@@ -299,13 +320,13 @@ function desempate(){
 
 function resultado(estado){
   PASO.textContent="Tu resultado";avance(100);
-  const c=conteo();
+  const c=conteoEstado();
   T.className="card oro";
   T.innerHTML=`<div class="res-top">
       <div class="et">Tu estado predominante</div>
       <h2>${esc(estado)}</h2>
       <p>${esc(FRASE[estado])}</p>
-      <div class="cnt">${LETRAS.map(l=>`<span>${l} · ${c[l]}</span>`).join("")}</div>
+      <div class="cnt">${ESTADOS.map(x=>`<span>${esc(x)} · ${c[x]}</span>`).join("")}</div>
     </div>
     <div class="in">
     <h3>Señales para identificarlo</h3>
@@ -325,7 +346,7 @@ function resultado(estado){
 async function enviar(estado){
   const caja=document.getElementById("envio");
   const cuerpo={filial:filial,genero:genero,estado:estado,
-    respuestas:{letras:resp.slice(),conteo:conteo(),version:"radar-geb-9p"}};
+    respuestas:{letras:resp.slice(),conteo:conteo(),estados:conteoEstado(),version:"radar-geb-9p-e"}};
   if(!SUPABASE_URL||!SUPABASE_ANON_KEY){
     caja.textContent="Modo de prueba: la respuesta no se guardó (falta configurar la base).";return;
   }
