@@ -2,8 +2,10 @@ import { requireAdmin } from "@/lib/auth";
 import { AppShell } from "@/app/components/AppShell";
 import { AdminTabs } from "../AdminTabs";
 import { createCliente, updateCliente, setClienteActivo } from "./actions";
+import { IdentidadCliente } from "./IdentidadCliente";
+import { urlLogo, type ClienteIdentidad } from "@/lib/clientes";
 
-type Cliente = { id: string; nombre: string; activo: boolean };
+type Cliente = ClienteIdentidad & { activo: boolean };
 
 const cardClass = "rounded-xl border border-ink/10 bg-surface p-5 shadow-sm";
 const inputClass =
@@ -17,11 +19,18 @@ export default async function ClientesPage({
   const { supabase, user } = await requireAdmin();
   const { error } = await searchParams;
 
-  const { data } = await supabase
+  // El segundo intento es por si todavía no se corrió
+  // scripts/portal_amigable.sql: la página sigue sirviendo para lo de antes.
+  const completa = await supabase
     .from("clientes")
-    .select("id, nombre, activo")
+    .select("id, nombre, activo, logo_path, color_hex, color_opacidad")
     .order("nombre");
-  const clientes = (data ?? []) as Cliente[];
+
+  const clientes = (completa.error
+    ? (await supabase.from("clientes").select("id, nombre, activo").order("nombre")).data
+    : completa.data) as Cliente[] | null;
+
+  const lista = clientes ?? [];
 
   return (
     <AppShell title="Clientes" active="admin" isAdmin userEmail={user.email}>
@@ -37,11 +46,19 @@ export default async function ClientesPage({
           </p>
         )}
 
+        {completa.error && (
+          <p
+            role="alert"
+            className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+          >
+            Falta correr <code>scripts/portal_amigable.sql</code> en Supabase: todavía
+            no se pueden guardar logos ni colores.
+          </p>
+        )}
+
         {/* Crear cliente */}
         <section className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold tracking-tight text-ink">
-            Crear cliente
-          </h2>
+          <h2 className="text-xl font-semibold tracking-tight text-ink">Crear cliente</h2>
           <div className={cardClass}>
             <form
               action={createCliente}
@@ -52,12 +69,7 @@ export default async function ClientesPage({
                 <input name="nombre" required className={inputClass} />
               </label>
               <label className="flex items-center gap-2 pb-2 text-sm font-medium text-ink">
-                <input
-                  name="activo"
-                  type="checkbox"
-                  defaultChecked
-                  className="h-4 w-4"
-                />
+                <input name="activo" type="checkbox" defaultChecked className="h-4 w-4" />
                 Activo
               </label>
               <button
@@ -68,43 +80,47 @@ export default async function ClientesPage({
               </button>
             </form>
           </div>
+          <p className="text-sm text-muted">
+            El logo y el color se cargan abajo, en la ficha del cliente.
+          </p>
         </section>
 
         {/* Listado de clientes */}
         <section className="flex flex-col gap-4">
           <h2 className="text-xl font-semibold tracking-tight text-ink">
-            Clientes ({clientes.length})
+            Clientes ({lista.length})
           </h2>
 
-          {clientes.length === 0 ? (
+          {lista.length === 0 ? (
             <p className="text-sm text-muted">Aún no hay clientes.</p>
           ) : (
-            clientes.map((cliente) => (
+            lista.map((cliente) => (
               <div key={cliente.id} className={cardClass}>
-                <div className="flex flex-wrap items-end justify-between gap-4">
-                  <form
-                    action={updateCliente}
-                    className="flex flex-1 items-end gap-3"
-                  >
+                <div className="flex flex-col gap-4">
+                  <form action={updateCliente} className="flex flex-col gap-4">
                     <input type="hidden" name="id" value={cliente.id} />
-                    <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-ink">
-                      Nombre
-                      <input
-                        name="nombre"
-                        defaultValue={cliente.nombre}
-                        required
-                        className={inputClass}
-                      />
-                    </label>
-                    <button
-                      type="submit"
-                      className="h-fit rounded-md border border-brand-700 px-3 py-2 text-sm font-medium text-brand-700 transition-colors hover:bg-brand-700 hover:text-white"
-                    >
-                      Guardar
-                    </button>
+
+                    <IdentidadCliente
+                      nombre={cliente.nombre}
+                      logoActual={urlLogo(cliente.logo_path)}
+                      colorInicial={cliente.color_hex ?? null}
+                      opacidadInicial={cliente.color_opacidad ?? null}
+                    />
+
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <button
+                        type="submit"
+                        className="rounded-md bg-brand-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+                      >
+                        Guardar cambios
+                      </button>
+                      <span className="text-xs text-muted">
+                        PNG, SVG, JPG o WebP, hasta 1 MB.
+                      </span>
+                    </div>
                   </form>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-end gap-3 border-t border-ink/10 pt-4">
                     <span
                       className={
                         cliente.activo

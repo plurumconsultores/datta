@@ -43,3 +43,42 @@ body {
   color: var(--ink);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
+
+/*
+ * Sección de cliente en el portal: al pasar el cursor, el color del cliente
+ * entra difuminado detrás de las tarjetas y se va al salir. Cada sección
+ * define su propio --tinte (color + transparencia configurados en
+ * /admin/clientes); sin él no se pinta nada.
+ */
+.grupo-cliente {
+  position: relative;
+}
+
+.grupo-cliente::before {
+  content: "";
+  position: absolute;
+  inset: -20px -28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(58% 130% at 16% -10%, var(--tinte, transparent), transparent 70%),
+    radial-gradient(45% 120% at 88% -20%, var(--tinte, transparent), transparent 75%);
+  opacity: 0;
+  transition: opacity 350ms ease;
+  pointer-events: none;
+}
+
+.grupo-cliente:hover::before,
+.grupo-cliente:focus-within::before {
+  opacity: 1;
+}
+
+/* Las tarjetas y el encabezado van por encima del difuminado. */
+.grupo-cliente > * {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grupo-cliente::before {
+    transition: none;
+  }
+}

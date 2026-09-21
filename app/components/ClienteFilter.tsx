@@ -1,64 +1,61 @@
-"use client";
+import Link from "next/link";
+import { ClienteLogo } from "./ClienteLogo";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
-
-type ClienteFilterContextValue = {
-  selected: string;
-  setSelected: (value: string) => void;
+export type OpcionCliente = {
+  /** "todos", "internos" o el id del cliente. */
+  value: string;
+  label: string;
+  count: number;
+  logo: string | null;
+  color: string;
 };
 
-const ClienteFilterContext = createContext<ClienteFilterContextValue | null>(
-  null,
-);
-
 /**
- * Comparte la selección del filtro de clientes entre el desplegable de la barra
- * superior y la cuadrícula del portal. El filtrado ocurre en el navegador
- * (son pocos tableros). RLS ya limitó qué puede ver el usuario.
+ * Filtro de clientes del portal: una fila de chips con logo y conteo. La
+ * selección viaja en la URL (/?cliente=<id>), así sobrevive a entrar a un
+ * tablero y volver, y el enlace se puede compartir.
  */
-export function ClienteFilterProvider({
-  initial = "todos",
-  children,
+export function ClienteChips({
+  opciones,
+  seleccionado,
 }: {
-  initial?: string;
-  children: ReactNode;
+  opciones: OpcionCliente[];
+  seleccionado: string;
 }) {
-  const [selected, setSelected] = useState(initial);
+  // "Todos" + un solo grupo: no hay nada que filtrar.
+  if (opciones.length <= 2) return null;
 
   return (
-    <ClienteFilterContext.Provider value={{ selected, setSelected }}>
-      {children}
-    </ClienteFilterContext.Provider>
-  );
-}
+    <nav aria-label="Filtrar por cliente" className="flex flex-wrap items-center gap-2">
+      {opciones.map((opcion) => {
+        const activo = opcion.value === seleccionado;
+        const href =
+          opcion.value === "todos" ? "/" : `/?cliente=${encodeURIComponent(opcion.value)}`;
 
-export function useClienteFilter() {
-  const ctx = useContext(ClienteFilterContext);
-  if (!ctx) {
-    throw new Error("ClienteFilter debe usarse dentro de ClienteFilterProvider");
-  }
-  return ctx;
-}
-
-export type ClienteOption = { value: string; label: string };
-
-export function ClienteSelect({ options }: { options: ClienteOption[] }) {
-  const { selected, setSelected } = useClienteFilter();
-
-  return (
-    <label className="flex items-center gap-2">
-      <span className="sr-only">Filtrar por cliente</span>
-      <select
-        value={selected}
-        onChange={(e) => setSelected(e.target.value)}
-        className="rounded-md border border-ink/15 bg-surface px-3 py-1.5 text-sm text-ink outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand-300/40"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
+        return (
+          <Link
+            key={opcion.value}
+            href={href}
+            scroll={false}
+            aria-current={activo ? "page" : undefined}
+            className={`flex items-center gap-2 rounded-full py-1.5 pl-3 pr-3.5 text-sm font-medium transition-colors ${
+              activo
+                ? "bg-brand-900 text-white"
+                : "border border-ink/15 bg-surface text-ink hover:bg-page"
+            }`}
+          >
+            {opcion.value !== "todos" && (
+              <ClienteLogo
+                nombre={opcion.label}
+                logo={opcion.logo}
+                color={opcion.color}
+                tamano={18}
+              />
+            )}
+            {opcion.label} · {opcion.count}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
