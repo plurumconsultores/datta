@@ -128,3 +128,13 @@ body {
     radial-gradient(90% 80% at 10% 95%, rgba(128, 188, 0, 0.35), transparent 62%),
     linear-gradient(155deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-800) 100%);
 }
+
+/* Pestañas desplegables (<details>): se oculta el triángulo nativo, porque
+   cada pestaña dibuja su propia flecha. */
+summary {
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}

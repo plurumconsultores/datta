@@ -87,6 +87,18 @@ export function SegregacionUsuario({
     return Object.values(delTablero).some((valores) => valores.length > 0);
   }
 
+  /** Resumen de una línea para la pestaña cerrada: "Regional: 2 de 15". */
+  function resumenLimites(tablero: TableroSegregacion): string {
+    const delTablero = limites[tablero.slug] ?? {};
+    return tablero.variables
+      .filter((variable) => (delTablero[variable.clave] ?? []).length > 0)
+      .map(
+        (variable) =>
+          `${variable.etiqueta}: ${delTablero[variable.clave].length} de ${variable.valores.length}`,
+      )
+      .join(" · ");
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <label className="flex items-center gap-2 text-sm text-ink">
@@ -114,20 +126,55 @@ export function SegregacionUsuario({
             const limitado = estaLimitado(tablero.slug);
             const sinVariables = tablero.variables.length === 0;
 
-            return (
-              <div
-                key={tablero.slug}
-                className="rounded-lg border border-ink/10 bg-page/60 p-4"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
+            // Un tablero que no declara variables no tiene nada que desplegar.
+            if (sinVariables) {
+              return (
+                <div
+                  key={tablero.slug}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-ink/10 bg-page/60 px-4 py-3"
+                >
                   <p className="text-sm font-medium text-ink">{tablero.title}</p>
+                  <span className="text-xs text-muted">
+                    Este tablero no declara variables
+                  </span>
+                </div>
+              );
+            }
 
-                  {sinVariables ? (
-                    <span className="text-xs text-muted">
-                      Este tablero no declara variables
-                    </span>
-                  ) : (
-                    <div className="flex items-center gap-4">
+            return (
+              <details
+                key={tablero.slug}
+                className="group rounded-lg border border-ink/10 bg-page/60"
+              >
+                <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 px-4 py-3">
+                  <span className="text-sm font-medium text-ink">
+                    {tablero.title}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    {limitado ? (
+                      <span className="rounded-full bg-brand-900 px-2.5 py-0.5 text-xs font-medium text-white">
+                        {resumenLimites(tablero)}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted">Sin limitación</span>
+                    )}
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                      className="h-4 w-4 shrink-0 text-muted transition-transform group-open:rotate-180"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
+                </summary>
+
+                <div className="flex flex-col gap-3 border-t border-ink/10 px-4 py-3">
+                  <div className="flex items-center gap-4">
                       <label className="flex items-center gap-2 text-sm text-ink">
                         <input
                           type="radio"
@@ -149,12 +196,9 @@ export function SegregacionUsuario({
                         />
                         Limitar datos
                       </label>
-                    </div>
-                  )}
-                </div>
+                  </div>
 
-                {!sinVariables && (
-                  <div className="mt-3 flex flex-col gap-3 border-t border-ink/10 pt-3">
+                  <div className="flex flex-col gap-3 border-t border-ink/10 pt-3">
                     {tablero.variables.map((variable) => {
                       const elegidos = limites[tablero.slug]?.[variable.clave] ?? [];
 
@@ -194,8 +238,8 @@ export function SegregacionUsuario({
                       Sin ninguna casilla marcada, esa variable no limita nada.
                     </p>
                   </div>
-                )}
-              </div>
+                </div>
+              </details>
             );
           })}
         </div>
