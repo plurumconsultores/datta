@@ -17,6 +17,7 @@ type DashboardFila = {
   slug: string;
   title: string;
   cliente_id: string | null;
+  is_active: boolean;
   variables?: unknown;
 };
 type Segregacion = { user_id: string; requiere: boolean };
@@ -72,7 +73,7 @@ export default async function UsuariosPage({
   const [tablerosQ, segregacionQ, limitesQ] = await Promise.all([
     supabase
       .from("dashboards")
-      .select("slug, title, cliente_id, variables")
+      .select("slug, title, cliente_id, is_active, variables")
       .order("sort_order", { ascending: true }),
     supabase.from("usuario_segregacion").select("user_id, requiere"),
     supabase
@@ -102,16 +103,40 @@ export default async function UsuariosPage({
     ),
   );
 
+  // Quien tenga rol admin o analista ve todos los tableros: es lo que dice la
+  // función puede_ver_todo() de Supabase, de la que cuelga la política de RLS.
+  const rolesQueVenTodo = new Set(
+    allRoles
+      .filter((rol) => ["admin", "analista"].includes(rol.name.toLowerCase()))
+      .map((rol) => rol.id),
+  );
+
+  function veTodo(userId: string): boolean {
+    for (const roleId of rolesQueVenTodo) {
+      if (assignedRoles.has(`${userId}:${roleId}`)) return true;
+    }
+    return false;
+  }
+
   /**
-   * Tableros a los que llega un usuario: los de sus clientes, más los internos
-   * (sin cliente). Es la misma regla con la que el portal arma las secciones.
+   * Tableros a los que llega un usuario. Copia exacta de la política de RLS
+   * sobre dashboards:
+   *
+   *   is_active AND (puede_ver_todo() OR cliente_id IN (sus clientes))
+   *
+   * Es decir: el tablero tiene que estar activo y, salvo que el usuario vea
+   * todo, ser de uno de sus clientes. Los internos (sin cliente) no entran.
    */
   function tablerosDe(userId: string): TableroSegregacion[] {
+    const todo = veTodo(userId);
+
     return tablerosTodos
       .filter(
         (tablero) =>
-          tablero.cliente_id === null ||
-          assignedClientes.has(`${userId}:${tablero.cliente_id}`),
+          tablero.is_active &&
+          (todo ||
+            (tablero.cliente_id !== null &&
+              assignedClientes.has(`${userId}:${tablero.cliente_id}`))),
       )
       .map((tablero) => ({
         slug: tablero.slug,
