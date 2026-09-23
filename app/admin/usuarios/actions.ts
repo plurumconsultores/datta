@@ -128,3 +128,79 @@ export async function setUserCliente(
   revalidatePath(USERS_PATH);
   revalidatePath("/");
 }
+
+/**
+ * Enciende o apaga la segregación de datos de un usuario. Los límites ya
+ * guardados no se borran: si vuelve a encenderse, quedan como estaban.
+ */
+export async function setSegregacionUsuario(
+  targetUserId: string,
+  requiere: boolean,
+) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("usuario_segregacion")
+    .upsert(
+      { user_id: targetUserId, requiere, actualizado_en: new Date().toISOString() },
+      { onConflict: "user_id" },
+    );
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(USERS_PATH);
+}
+
+/**
+ * Guarda los valores que un usuario puede ver de una variable dentro de un
+ * tablero. Sin valores, se borra el renglón: esa variable deja de limitar.
+ */
+export async function guardarLimite(
+  targetUserId: string,
+  dashboardSlug: string,
+  variable: string,
+  valores: string[],
+) {
+  const { supabase } = await requireAdmin();
+
+  const limpios = [...new Set(valores.filter(Boolean))];
+
+  if (limpios.length === 0) {
+    const { error } = await supabase
+      .from("usuario_limites")
+      .delete()
+      .eq("user_id", targetUserId)
+      .eq("dashboard_slug", dashboardSlug)
+      .eq("variable", variable);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase.from("usuario_limites").upsert(
+      {
+        user_id: targetUserId,
+        dashboard_slug: dashboardSlug,
+        variable,
+        valores: limpios,
+        actualizado_en: new Date().toISOString(),
+      },
+      { onConflict: "user_id,dashboard_slug,variable" },
+    );
+    if (error) throw new Error(error.message);
+  }
+
+  revalidatePath(USERS_PATH);
+}
+
+/** Deja un tablero sin ninguna limitación para ese usuario. */
+export async function limpiarLimites(targetUserId: string, dashboardSlug: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("usuario_limites")
+    .delete()
+    .eq("user_id", targetUserId)
+    .eq("dashboard_slug", dashboardSlug);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(USERS_PATH);
+}

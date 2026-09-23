@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
+import { leerVariablesDeclaradas } from "@/lib/segregacion";
 
 type DashboardType = "native" | "powerbi";
 
@@ -50,6 +51,9 @@ function parseDashboardForm(formData: FormData):
       type,
       // Solo guardamos el campo correspondiente al tipo; el otro se limpia.
       content: type === "native" ? content : null,
+      // Variables por las que se puede segregar: se releen del HTML cada vez
+      // que se guarda, para que Administración no quede desactualizada.
+      variables: type === "native" ? leerVariablesDeclaradas(content) : [],
       embed_url: type === "powerbi" ? embedUrl : null,
       sort_order: sortOrder,
       is_active: isActive,

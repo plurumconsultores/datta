@@ -6,11 +6,26 @@ import { createUser } from "./actions";
 import { UserRoleCheckbox } from "./UserRoleCheckbox";
 import { UserClienteCheckbox } from "./UserClienteCheckbox";
 import { DeleteUserButton } from "./DeleteUserButton";
+import { SegregacionUsuario, type TableroSegregacion } from "./SegregacionUsuario";
+import { normalizarVariables } from "@/lib/segregacion";
 
 type Role = { id: string; name: string };
 type UserRole = { user_id: string; role_id: string };
 type Cliente = { id: string; nombre: string };
 type UserCliente = { user_id: string; cliente_id: string };
+type DashboardFila = {
+  slug: string;
+  title: string;
+  cliente_id: string | null;
+  variables?: unknown;
+};
+type Segregacion = { user_id: string; requiere: boolean };
+type LimiteFila = {
+  user_id: string;
+  dashboard_slug: string;
+  variable: string;
+  valores: string[] | null;
+};
 
 const cardClass = "rounded-xl border border-ink/10 bg-surface p-5 shadow-sm";
 const inputClass =
@@ -51,6 +66,31 @@ export default async function UsuariosPage({
     supabase.from("usuario_clientes").select("user_id, cliente_id"),
   ]);
 
+  // Segregación de datos. Si todavía no se corrió
+  // scripts/segregacion_usuarios.sql, estas tres consultas fallan y la página
+  // sigue funcionando para todo lo demás.
+  const [tablerosQ, segregacionQ, limitesQ] = await Promise.all([
+    supabase
+      .from("dashboards")
+      .select("slug, title, cliente_id, variables")
+      .order("sort_order", { ascending: true }),
+    supabase.from("usuario_segregacion").select("user_id, requiere"),
+    supabase
+      .from("usuario_limites")
+      .select("user_id, dashboard_slug, variable, valores"),
+  ]);
+
+  const faltaSegregacion = Boolean(
+    tablerosQ.error || segregacionQ.error || limitesQ.error,
+  );
+  const tablerosTodos = (tablerosQ.data ?? []) as DashboardFila[];
+  const requierenSegregacion = new Set(
+    ((segregacionQ.data ?? []) as Segregacion[])
+      .filter((fila) => fila.requiere)
+      .map((fila) => fila.user_id),
+  );
+  const limitesFilas = (limitesQ.data ?? []) as LimiteFila[];
+
   const allRoles = (roles ?? []) as Role[];
   const allClientes = (clientes ?? []) as Cliente[];
   const assignedRoles = new Set(
@@ -61,6 +101,33 @@ export default async function UsuariosPage({
       (uc) => `${uc.user_id}:${uc.cliente_id}`,
     ),
   );
+
+  /**
+   * Tableros a los que llega un usuario: los de sus clientes, más los internos
+   * (sin cliente). Es la misma regla con la que el portal arma las secciones.
+   */
+  function tablerosDe(userId: string): TableroSegregacion[] {
+    return tablerosTodos
+      .filter(
+        (tablero) =>
+          tablero.cliente_id === null ||
+          assignedClientes.has(`${userId}:${tablero.cliente_id}`),
+      )
+      .map((tablero) => ({
+        slug: tablero.slug,
+        title: tablero.title,
+        variables: normalizarVariables(tablero.variables),
+        limites: Object.fromEntries(
+          limitesFilas
+            .filter(
+              (limite) =>
+                limite.user_id === userId &&
+                limite.dashboard_slug === tablero.slug,
+            )
+            .map((limite) => [limite.variable, limite.valores ?? []]),
+        ),
+      }));
+  }
 
   return (
     <AppShell title="Usuarios" active="admin" isAdmin userEmail={currentUser.email}>
@@ -73,6 +140,16 @@ export default async function UsuariosPage({
             className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
           >
             {error}
+          </p>
+        )}
+
+        {faltaSegregacion && (
+          <p
+            role="alert"
+            className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+          >
+            Falta correr <code>scripts/segregacion_usuarios.sql</code> en Supabase:
+            todavía no se puede segregar la información por usuario.
           </p>
         )}
 
@@ -198,6 +275,19 @@ export default async function UsuariosPage({
                       </div>
                     )}
                   </div>
+
+                  {!faltaSegregacion && (
+                    <div>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                        Segregación de datos
+                      </p>
+                      <SegregacionUsuario
+                        userId={u.id}
+                        requiereInicial={requierenSegregacion.has(u.id)}
+                        tableros={tablerosDe(u.id)}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             ))

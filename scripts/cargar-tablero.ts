@@ -13,6 +13,7 @@
 import { loadEnvFile } from "node:process";
 import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
+import { leerVariablesDeclaradas } from "../lib/segregacion";
 
 async function main() {
   // Carga .env.local (no se hace automáticamente fuera de Next.js).
@@ -43,6 +44,16 @@ async function main() {
 
   const content = await readFile(filePath, "utf-8");
 
+  // Variables por las que se puede segregar este tablero. Van declaradas en su
+  // propio HTML (bloque <script id="datta-variables">); si no trae ninguna, el
+  // tablero queda sin límites posibles.
+  const variables = leerVariablesDeclaradas(content);
+  console.log(
+    variables.length === 0
+      ? "Sin variables declaradas (no se podrá limitar por datos)."
+      : `Variables declaradas: ${variables.map((v) => v.clave).join(", ")}`,
+  );
+
   // Cliente con la llave secreta: SOLO servidor / scripts. Nunca en el navegador.
   const supabase = createClient(url, secretKey, {
     auth: {
@@ -65,15 +76,29 @@ async function main() {
 
   if (existing) {
     // Actualiza solo title y content; conserva is_active y sort_order.
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("dashboards")
-      .update({ title, content })
+      .update({ title, content, variables })
       .eq("slug", slug)
       .select("id, slug")
       .single();
 
+    // Si todavía no se corrió scripts/segregacion_usuarios.sql, la columna
+    // variables no existe: se sube el tablero igual, sin ellas.
     if (error) {
-      console.error("Error al actualizar el tablero:", error.message);
+      console.warn(
+        `No se pudo guardar 'variables' (${error.message}). Se sube el tablero sin ellas.`,
+      );
+      ({ data, error } = await supabase
+        .from("dashboards")
+        .update({ title, content })
+        .eq("slug", slug)
+        .select("id, slug")
+        .single());
+    }
+
+    if (error || !data) {
+      console.error("Error al actualizar el tablero:", error?.message ?? "sin datos");
       process.exit(1);
     }
 
@@ -88,6 +113,7 @@ async function main() {
         is_active: true,
         sort_order: 0,
         content,
+        variables,
       })
       .select("id, slug")
       .single();

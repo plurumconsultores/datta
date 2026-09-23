@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { mapaDeLimites, type LimiteUsuario } from "@/lib/segregacion";
 
 /**
  * API de la base del Radar de mis Estados.
@@ -15,6 +16,13 @@ import { NextResponse } from "next/server";
 
 const CAMPOS = "id,creado_en,filial,genero,estado,origen,nota,respuestas";
 const CAMPOS_LOG = "id,ocurrido_en,actor_email,accion,registro_id,antes,despues";
+
+/**
+ * Columnas de esta base por las que se puede segregar. No se lee de la URL a
+ * propósito: el límite lo decide el servidor con lo guardado para el usuario,
+ * no lo que diga el tablero.
+ */
+const VARIABLES_SEGREGABLES = ["filial", "genero", "estado"];
 
 const FILIALES = ["TGI", "Enlaza", "Corporativa"];
 const GENEROS = ["Masculino", "Femenino", "Otro"];
@@ -36,16 +44,55 @@ async function contexto() {
  * una sola consulta se quedaría corta sin avisar.
  */
 type Cliente = Awaited<ReturnType<typeof createClient>>;
-async function todasLasFilas(supabase: Cliente) {
+
+/**
+ * Qué valores puede ver este usuario, según lo configurado en
+ * Administración -> Usuarios. Si tiene límites distintos en varios tableros
+ * que leen esta base, se aplica el más estricto (la intersección).
+ */
+async function limitesDelUsuario(
+  supabase: Cliente,
+  userId: string,
+): Promise<Record<string, string[]>> {
+  const { data: segregacion } = await supabase
+    .from("usuario_segregacion")
+    .select("requiere")
+    .eq("user_id", userId)
+    .maybeSingle<{ requiere: boolean }>();
+
+  if (!segregacion?.requiere) return {};
+
+  const { data } = await supabase
+    .from("usuario_limites")
+    .select("dashboard_slug, variable, valores")
+    .eq("user_id", userId)
+    .in("variable", VARIABLES_SEGREGABLES);
+
+  return mapaDeLimites((data ?? []) as LimiteUsuario[]);
+}
+async function todasLasFilas(
+  supabase: Cliente,
+  limites: Record<string, string[]> = {},
+) {
   const PASO = 1000;
   const TOPE = 50000;
   const filas: Record<string, unknown>[] = [];
   for (let desde = 0; desde < TOPE; desde += PASO) {
-    const { data, error } = await supabase
+    let consulta = supabase
       .from("respuestas_radar")
       .select(CAMPOS)
       .order("id", { ascending: false })
       .range(desde, desde + PASO - 1);
+
+    // El recorte va en la consulta: las filas prohibidas nunca salen de la base.
+    for (const variable of VARIABLES_SEGREGABLES) {
+      const permitidos = limites[variable];
+      if (permitidos && permitidos.length > 0) {
+        consulta = consulta.in(variable, permitidos);
+      }
+    }
+
+    const { data, error } = await consulta;
     if (error || !data || data.length === 0) break;
     filas.push(...data);
     if (data.length < PASO) break;
@@ -57,24 +104,39 @@ export async function GET(request: Request) {
   const { supabase, user, admin } = await contexto();
   if (!user) return NextResponse.json({ admin: false }, { status: 401 });
 
+  const limites = await limitesDelUsuario(supabase, user.id);
+  const limitado = Object.keys(limites).length > 0;
+
   // ?resumen=1 -> solo los conteos que dibuja la carrera (sin datos individuales).
   // Así el tablero no necesita llevar llaves de Supabase dentro del HTML.
   if (new URL(request.url).searchParams.has("resumen")) {
+    // La función radar_resumen cuenta sobre TODA la base, así que a un usuario
+    // con límites le filtraría nada: mejor no devolverle conteos que no le
+    // corresponden. Queda pendiente una versión de la función que reciba el
+    // recorte.
+    if (limitado) {
+      return NextResponse.json({ admin, resumen: null, limitado: true });
+    }
     const { data } = await supabase.rpc("radar_resumen");
     return NextResponse.json({ admin, resumen: data ?? {} });
   }
 
-  const filas = await todasLasFilas(supabase);
+  const filas = await todasLasFilas(supabase, limites);
 
-  const { data: movs } = await supabase
-    .from("respuestas_radar_log")
-    .select(CAMPOS_LOG)
-    .order("id", { ascending: false })
-    .limit(1000);
+  // El historial guarda los registros completos en antes/despues, así que a un
+  // usuario con límites no se le manda: dejaría ver lo que el recorte esconde.
+  const { data: movs } = limitado
+    ? { data: [] as Record<string, unknown>[] }
+    : await supabase
+        .from("respuestas_radar_log")
+        .select(CAMPOS_LOG)
+        .order("id", { ascending: false })
+        .limit(1000);
 
   return NextResponse.json({
     admin,
     correo: user.email,
+    limites,
     filas: filas ?? [],
     movs: movs ?? [],
   });
