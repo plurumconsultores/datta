@@ -2,13 +2,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { VisorTablero } from "@/app/components/VisorTablero";
+import { COLOR_PLURUM, colorCliente, urlLogo } from "@/lib/clientes";
 
 type Dashboard = {
   slug: string;
   title: string;
   type: "native" | "powerbi";
   embed_url: string | null;
+  cliente_id: string | null;
 };
+
+type ClienteFila = {
+  nombre: string;
+  logo_path: string | null;
+  color_hex: string | null;
+};
+
+/** Los tableros internos se presentan con la marca de Plurum. */
+const LOGO_PLURUM = "/PlurumLogo.svg";
 
 export default async function DashboardPage({
   params,
@@ -29,12 +41,24 @@ export default async function DashboardPage({
   // RLS hace que un tablero sin permiso (o inactivo) simplemente no aparezca.
   const { data: dashboard } = await supabase
     .from("dashboards")
-    .select("slug, title, type, embed_url")
+    .select("slug, title, type, embed_url, cliente_id")
     .eq("slug", slug)
     .single<Dashboard>();
 
   if (!dashboard) {
     notFound();
+  }
+
+  // Identidad del cliente para la pantalla de carga. Si algo falla, se usa la
+  // marca de Plurum: es una pantalla de espera, no vale la pena romper nada.
+  let cliente: ClienteFila | null = null;
+  if (dashboard.cliente_id) {
+    const { data } = await supabase
+      .from("clientes")
+      .select("nombre, logo_path, color_hex")
+      .eq("id", dashboard.cliente_id)
+      .maybeSingle<ClienteFila>();
+    cliente = data ?? null;
   }
 
   // Solo añadimos ?user= si hay correo; nunca metemos "undefined" en la URL.
@@ -75,23 +99,26 @@ export default async function DashboardPage({
       </header>
 
       <div className="flex-1 overflow-hidden">
-        {dashboard.type === "powerbi" ? (
-          <iframe
-            src={dashboard.embed_url ?? undefined}
-            title={dashboard.title}
-            className="h-full w-full border-0"
-            allowFullScreen
-          />
-        ) : (
-          <iframe
-            src={rawSrc}
-            title={dashboard.title}
-            // Aislamos el contenido nativo: permitimos scripts pero NO
-            // allow-same-origin, para que no acceda a las cookies ni al origen.
-            sandbox="allow-scripts allow-same-origin allow-downloads"
-            className="h-full w-full border-0 bg-white"
-          />
-        )}
+        <VisorTablero
+          src={
+            dashboard.type === "powerbi"
+              ? (dashboard.embed_url ?? undefined)
+              : rawSrc
+          }
+          titulo={dashboard.title}
+          esPowerBi={dashboard.type === "powerbi"}
+          clienteNombre={cliente?.nombre ?? null}
+          clienteLogo={
+            dashboard.cliente_id
+              ? urlLogo(cliente?.logo_path)
+              : LOGO_PLURUM
+          }
+          color={
+            dashboard.cliente_id
+              ? colorCliente(cliente?.color_hex)
+              : COLOR_PLURUM
+          }
+        />
       </div>
     </div>
   );

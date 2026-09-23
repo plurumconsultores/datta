@@ -138,3 +138,117 @@ summary {
 summary::-webkit-details-marker {
   display: none;
 }
+
+/* ===========================================================================
+   Pantalla de carga del visor de tableros (app/components/VisorTablero.tsx)
+   Fondo verde difuminado con isotipos de Plurum como marcas de agua, el
+   isotipo que gira hasta quedar como carita y guiña, y una barra de avance.
+   =========================================================================== */
+
+.carga-fondo {
+  background:
+    radial-gradient(85% 70% at 18% 0%, #5c9434 0%, transparent 58%),
+    radial-gradient(80% 80% at 92% 100%, #244013 0%, transparent 62%),
+    linear-gradient(160deg, var(--brand-900) 0%, var(--brand-700) 58%, var(--brand-800) 100%);
+}
+
+/*
+ * Marcas de agua: el mismo isotipo, en verde lima, cruzando la pantalla
+ * despacio de derecha a izquierda. Cada una entra pequeña y nítida, crece y se
+ * va difuminando hasta desaparecer.
+ */
+.carga-sello {
+  position: absolute;
+  height: auto;
+  fill: var(--brand-400);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity, filter;
+  animation: carga-cruzar-izquierda 26s linear infinite;
+}
+
+@keyframes carga-cruzar-izquierda {
+  0% {
+    transform: translate3d(75vw, 0, 0) rotate(var(--giro, 0deg)) scale(0.65);
+    opacity: 0;
+    filter: blur(0);
+  }
+  12% {
+    opacity: var(--op, 0.12);
+  }
+  62% {
+    opacity: var(--op, 0.12);
+    filter: blur(3px);
+  }
+  100% {
+    transform: translate3d(-30vw, -6vh, 0) rotate(calc(var(--giro, 0deg) + 14deg)) scale(1.75);
+    opacity: 0;
+    filter: blur(16px);
+  }
+}
+
+/*
+ * La carita. El giro y el guiño son animaciones del propio SVG (ver
+ * VisorTablero.tsx), para que compartan reloj: la carita gira un cuarto de
+ * vuelta —los dos puntos quedan arriba como ojos—, guiña ya girada, y vuelve.
+ */
+.carga-carita {
+  fill: #ffffff;
+}
+
+/*
+ * El guiño lo hace el propio SVG (una animación de la forma del ojo, en
+ * VisorTablero.tsx): el punto se deforma hasta volverse ">" y regresa. Aquí
+ * solo queda el giro de la carita.
+ */
+
+/* Barra indeterminada: un trozo de luz que recorre el riel. */
+.carga-barra {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.carga-barra::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 42%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--brand-400),
+    var(--color-cliente, var(--cian))
+  );
+  animation: carga-recorrer 1.4s ease-in-out infinite;
+}
+
+@keyframes carga-recorrer {
+  0% {
+    left: -45%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carga-sello,
+  .carga-carita,
+  .carga-barra::after {
+    animation: none;
+  }
+  .carga-sello {
+    opacity: var(--op, 0.12);
+  }
+  .carga-barra::after {
+    left: 0;
+    width: 100%;
+    opacity: 0.6;
+  }
+}
