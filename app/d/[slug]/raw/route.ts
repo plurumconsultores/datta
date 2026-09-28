@@ -5,7 +5,11 @@ import { mapaDeLimites, type LimiteUsuario } from "@/lib/segregacion";
  * Mete al principio del HTML un bloque con el contexto del usuario, para que
  * el tablero pueda leerlo sin parsear la URL:
  *
- *   window.DATTA = { usuario: "...", limites: { filial: ["TGI"] } }
+ *   window.DATTA = {
+ *     usuario: "...",
+ *     limites: { filial: ["TGI"] },
+ *     encuesta: "clima-2026"   // si hay una encuesta conectada a este tablero
+ *   }
  *
  * Un tablero que no sepa de esto simplemente lo ignora.
  */
@@ -72,9 +76,19 @@ export async function GET(
     limites = mapaDeLimites((data ?? []) as LimiteUsuario[]);
   }
 
+  // ¿Hay una encuesta conectada a este tablero? Se le pasa su slug para que
+  // pueda pedir los datos a /api/encuestas/<slug> sin llevarlo escrito dentro.
+  const { data: encuesta } = await supabase
+    .from("encuestas")
+    .select("slug")
+    .eq("dashboard_slug", slug)
+    .neq("estado", "borrador")
+    .maybeSingle<{ slug: string }>();
+
   const html = inyectarContexto(dashboard.content ?? "", {
     usuario: user.email ?? null,
     limites,
+    encuesta: encuesta?.slug ?? null,
   });
 
   return new Response(html, {

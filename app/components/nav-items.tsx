@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { DashboardsIcon, AdminIcon } from "./icons";
+import { DashboardsIcon, AdminIcon, EncuestasIcon } from "./icons";
 
-export type NavKey = "dashboards" | "admin";
+export type NavKey = "dashboards" | "encuestas" | "admin";
 
 export type NavItem = {
   key: NavKey;
@@ -11,10 +11,11 @@ export type NavItem = {
 };
 
 /**
- * Items de navegación de la barra lateral. "Administración" solo aparece si el
- * usuario es admin (la verificación is_admin se hace en las páginas).
+ * Items de navegación de la barra lateral. "Encuestas" la ve el equipo de
+ * Plurum (admin o analista) y "Administración" solo un admin; la verificación
+ * de verdad la hacen las páginas y RLS, esto solo decide qué se dibuja.
  */
-export function getNavItems(isAdmin: boolean): NavItem[] {
+export function getNavItems(isAdmin: boolean, esEquipo = false): NavItem[] {
   const items: NavItem[] = [
     {
       key: "dashboards",
@@ -23,6 +24,14 @@ export function getNavItems(isAdmin: boolean): NavItem[] {
       icon: <DashboardsIcon className="h-5 w-5" />,
     },
   ];
+
+  // El equipo entra al editor; un cliente, a su lista de enlaces y QR.
+  items.push({
+    key: "encuestas",
+    href: esEquipo || isAdmin ? "/admin/encuestas" : "/encuestas",
+    label: "Encuestas",
+    icon: <EncuestasIcon className="h-5 w-5" />,
+  });
 
   if (isAdmin) {
     items.push({

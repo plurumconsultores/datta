@@ -15,6 +15,7 @@ export function AppShell({
   title,
   active,
   isAdmin,
+  esEquipo = false,
   userEmail,
   headerSlot,
   children,
@@ -22,12 +23,14 @@ export function AppShell({
   title: string;
   active: NavKey;
   isAdmin: boolean;
+  /** admin o analista: ve el acceso a Encuestas. */
+  esEquipo?: boolean;
   userEmail: string | undefined;
   /** Contenido opcional en la barra superior (p. ej. el filtro de clientes). */
   headerSlot?: ReactNode;
   children: ReactNode;
 }) {
-  const items = getNavItems(isAdmin);
+  const items = getNavItems(isAdmin, esEquipo);
 
   return (
     <div className="min-h-screen bg-page">

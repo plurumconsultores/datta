@@ -89,7 +89,10 @@ export default async function Home({
   }
 
   const { cliente: clienteParam } = await searchParams;
-  const { data: isAdmin } = await supabase.rpc("is_admin");
+  const [{ data: isAdmin }, { data: esEquipo }] = await Promise.all([
+    supabase.rpc("is_admin"),
+    supabase.rpc("puede_ver_todo"),
+  ]);
 
   // RLS filtra a lo permitido: dashboards visibles y clientes visibles
   // (los asignados, o todos si el usuario "ve todo"). Sin filtros en código.
@@ -201,6 +204,7 @@ export default async function Home({
       title="Mis tableros"
       active="dashboards"
       isAdmin={Boolean(isAdmin)}
+      esEquipo={Boolean(esEquipo)}
       userEmail={user.email}
     >
       <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">

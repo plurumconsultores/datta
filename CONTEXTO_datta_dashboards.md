@@ -136,3 +136,101 @@ usuario, sin creerle nada al tablero. A un usuario con límites no le manda el
 historial de movimientos, y `?resumen=1` le responde `resumen: null` con
 `limitado: true`, porque la función `radar_resumen` cuenta sobre toda la base.
 Queda pendiente una versión de esa función que reciba el recorte.
+
+## Encuestas hechas desde Datta (sept 2026)
+
+Además de las encuestas a la medida en `public/e/<nombre>.html` (como el Radar), Datta
+tiene un apartado para armarlas sin programar: **Encuestas**, en la barra lateral, visible
+para quien tenga rol `admin` o `analista`.
+
+### Cómo funciona
+
+- La definición de cada encuesta vive en la tabla `encuestas`: título, cliente, colores,
+  mensaje de bienvenida, preguntas y mensaje de cierre.
+- Las respuestas **no** comparten tabla: al publicar, la función
+  `crear_tabla_respuestas(slug)` crea `respuestas_<slug>` con su RLS. Esa función valida
+  el slug y exige rol de equipo; desde la aplicación no se arma SQL.
+- La encuesta se ve en `/e/<slug>`, sin cuenta, porque `proxy.ts` deja pasar todo lo que
+  cuelga de `/e/`. Datta genera el enlace y su QR.
+- Las respuestas las inserta el servidor con la llave secreta (`/e/<slug>/responder`), así
+  que la tabla no tiene ninguna política de escritura abierta y el navegador nunca ve una
+  llave de Supabase.
+- Lo que llega se comprueba contra la definición: una opción que no existe, una escala
+  fuera de rango o una obligatoria vacía se rechazan.
+
+### Tipos de pregunta
+
+Opción única, opción múltiple (con tope opcional), escala y texto abierto (caja de una o
+varias líneas, con tope de caracteres). La escala trae Likert 1 a 5,
+frecuencia 1 a 5 y Plurum 1 a 10 —la escala de Plurum es de 1 a 10, siempre—, más un
+atajo "0 a 10" para los clientes que la piden así. El rango es editable: puede empezar en
+0 y llegar hasta once botones, con las etiquetas de los extremos que se quieran.
+
+Las respuestas abiertas no se agrupan: se leen una por una o se descargan en el CSV, y un
+tablero conectado solo puede contar cuántos respondieron. Por eso, si un tablero espera
+una variable y en la encuesta es de texto abierto, el análisis de compatibilidad lo marca
+en rojo.
+
+### Requisitos
+
+- Correr `scripts/encuestas.sql` una vez en Supabase.
+- `npm install qrcode` en el proyecto: es lo que dibuja el QR. Sin ese paquete todo
+  funciona menos el QR, y el panel lo dice.
+
+### Lo que sigue
+
+El envío personalizado por correo (mensaje introductorio y enlace propio por persona)
+todavía no está: hoy el enlace es único y la respuesta es anónima.
+
+### Qué ve el cliente
+
+Un usuario de cliente no entra nunca al editor. En su sección **Encuestas** ve, de las
+encuestas de sus clientes, solo las que el equipo marcó con **Mostrarle el enlace y el QR
+al cliente**: el título, si está abierta o cerrada, el enlace para copiar y el QR para
+descargar. Ni las preguntas, ni las respuestas una por una.
+
+Ese interruptor está en el bloque *Enlace y QR* del editor, y existe justamente para que
+mientras se arma la encuesta el cliente no la vea. Una encuesta interna (sin cliente) no
+se puede compartir así.
+
+Quién lee qué, en la base:
+
+| Quién | Definición | Respuestas | Edita |
+|---|---|---|---|
+| admin o analista | todas | todas | sí |
+| usuario de un cliente | las de su cliente, si están compartidas | las de su cliente (vía un tablero conectado) | no |
+| sin cuenta | solo responder | no | no |
+
+### Abierta o cerrada
+
+El estado de la encuesta manda sobre el enlace:
+
+- **Publicada**: el enlace recibe respuestas.
+- **Cerrada**: el enlace sigue vivo pero muestra "Esta encuesta ya está cerrada", con los
+  colores y el logo que tenga configurados, y la ruta que recibe respuestas contesta 404.
+  Sirve para cortar el diligenciamiento sin tener que borrar nada.
+- **Borrador**: todavía no existe la tabla de respuestas ni el enlace.
+
+### Conectar una encuesta con un tablero
+
+En el editor, el bloque **Tablero que alimenta**. Al elegir un tablero, Datta compara las
+variables que ese tablero declara en su HTML (el bloque `datta-variables`, el mismo de la
+segregación de datos) con los identificadores de las preguntas, y avisa de lo que no
+encaja: una variable que ninguna pregunta tiene, valores que el tablero espera y la
+encuesta no ofrece, o al revés. No bloquea: informa. Antes de guardar pide confirmación,
+porque conectar cambia lo que ve la gente en un tablero ya publicado.
+
+Cada pregunta tiene un **identificador** editable (`filial`, `nivel`…): es la llave con la
+que se guarda la respuesta y el nombre por el que la busca un tablero. Cambiarlo con
+respuestas ya recogidas rompe la correspondencia con las viejas.
+
+Al tablero conectado, Datta le inyecta el slug de su encuesta:
+
+    window.DATTA = { usuario, limites, encuesta: "clima-2026" }
+
+Y el tablero pide los datos a su propia aplicación, sin llevar llaves dentro:
+
+    fetch(`/api/encuestas/${window.DATTA.encuesta}?resumen=1`, {credentials:"same-origin"})
+
+`?resumen=1` devuelve conteos por pregunta (y el promedio de las escalas); sin ese
+parámetro devuelve las respuestas fila por fila, pedidas por páginas de 1.000.

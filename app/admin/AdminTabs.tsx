@@ -1,9 +1,10 @@
 import Link from "next/link";
 
-type TabKey = "tableros" | "clientes" | "usuarios";
+type TabKey = "tableros" | "encuestas" | "clientes" | "usuarios";
 
 const TABS: { key: TabKey; href: string; label: string }[] = [
   { key: "tableros", href: "/admin", label: "Tableros" },
+  { key: "encuestas", href: "/admin/encuestas", label: "Encuestas" },
   { key: "clientes", href: "/admin/clientes", label: "Clientes" },
   { key: "usuarios", href: "/admin/usuarios", label: "Usuarios" },
 ];

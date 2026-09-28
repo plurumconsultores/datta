@@ -29,3 +29,34 @@ export async function requireAdmin() {
 
   return { supabase, user };
 }
+
+
+/**
+ * Protege lo que puede usar el equipo de Plurum: rol admin o analista. Es la
+ * misma condición que la función puede_ver_todo() de Supabase, de la que
+ * cuelgan las políticas de RLS de las encuestas.
+ * - Sin sesión -> /login.
+ * - Con sesión pero sin rol -> /.
+ */
+export async function requireEquipo() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const [{ data: equipo }, { data: admin }] = await Promise.all([
+    supabase.rpc("puede_ver_todo"),
+    supabase.rpc("is_admin"),
+  ]);
+
+  if (!equipo) {
+    redirect("/");
+  }
+
+  return { supabase, user, isAdmin: admin === true };
+}

@@ -74,3 +74,25 @@ export function CloseIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/** Encuestas: una hoja con casillas marcadas. */
+export function EncuestasIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={className}
+    >
+      <rect x="4" y="3" width="16" height="18" rx="2" />
+      <polyline points="8 8 9.5 9.5 12 7" />
+      <line x1="14.5" y1="8.5" x2="17" y2="8.5" />
+      <polyline points="8 14 9.5 15.5 12 13" />
+      <line x1="14.5" y1="14.5" x2="17" y2="14.5" />
+    </svg>
+  );
+}
