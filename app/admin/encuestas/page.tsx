@@ -3,7 +3,7 @@ import { requireEquipo } from "@/lib/auth";
 import { AppShell } from "@/app/components/AppShell";
 import { AdminTabs } from "../AdminTabs";
 import { crearEncuesta } from "./actions";
-import { normalizarPreguntas } from "@/lib/encuestas";
+import { normalizarPreguntas, preguntasReales } from "@/lib/encuestas";
 
 type EncuestaFila = {
   id: string;
@@ -148,7 +148,9 @@ export default async function EncuestasPage({
           ) : (
             <div className="flex flex-col gap-3">
               {encuestas.map((encuesta) => {
-                const preguntas = normalizarPreguntas(encuesta.preguntas);
+                const preguntas = preguntasReales(
+                  normalizarPreguntas(encuesta.preguntas),
+                );
                 const cliente = encuesta.cliente_id
                   ? nombrePorCliente.get(String(encuesta.cliente_id))
                   : "Interno";

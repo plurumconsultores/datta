@@ -3,7 +3,12 @@ import { notFound } from "next/navigation";
 import { requireEquipo } from "@/lib/auth";
 import { AppShell } from "@/app/components/AppShell";
 import { AdminTabs } from "../../../AdminTabs";
-import { normalizarPreguntas, tablaDe, type Pregunta } from "@/lib/encuestas";
+import {
+  normalizarPreguntas,
+  preguntasReales,
+  tablaDe,
+  type Pregunta,
+} from "@/lib/encuestas";
 
 const TOPE = 200;
 
@@ -39,7 +44,9 @@ export default async function RespuestasPage({
 
   if (!encuesta) notFound();
 
-  const preguntas: Pregunta[] = normalizarPreguntas(encuesta.preguntas);
+  const preguntas: Pregunta[] = preguntasReales(
+    normalizarPreguntas(encuesta.preguntas),
+  );
   const tabla = encuesta.tabla_respuestas ?? tablaDe(encuesta.slug);
 
   const { count } = await supabase

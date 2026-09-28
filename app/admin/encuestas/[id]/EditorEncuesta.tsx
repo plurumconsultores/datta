@@ -11,6 +11,7 @@ import {
   aIdentificador,
   contrasteSobre,
   esHex,
+  opcionesPosibles,
   puntosDeEscala,
   type Bienvenida,
   type Despedida,
@@ -20,6 +21,7 @@ import {
   type TipoPregunta,
 } from "@/lib/encuestas";
 import { cambiarEstado, guardarEncuesta, publicarEncuesta } from "../actions";
+import { ReglasPregunta } from "./ReglasPregunta";
 
 const inputClass =
   "rounded-md border border-ink/15 bg-surface px-3 py-2 text-sm text-ink outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand-300/40";
@@ -30,6 +32,7 @@ function preguntaNueva(indice: number): Pregunta {
   return {
     id: `p${Date.now().toString(36)}${indice}`,
     texto: "",
+    descripcion: "",
     tipo: "unica",
     obligatoria: true,
     opciones: ["", ""],
@@ -37,7 +40,28 @@ function preguntaNueva(indice: number): Pregunta {
     escala: { ...ESCALA_POR_DEFECTO },
     textoLargo: true,
     maxCaracteres: 500,
+    condicion: null,
+    opcionesSegun: null,
   };
+}
+
+/** Un bloque de solo texto: no se responde, se lee y se sigue. */
+function notaNueva(indice: number): Pregunta {
+  return { ...preguntaNueva(indice), tipo: "nota", obligatoria: false, opciones: [] };
+}
+
+/**
+ * Las preguntas anteriores que pueden condicionar a la que está en el índice
+ * dado: solo las de opciones, porque una condición se define marcando
+ * opciones, y solo las que van antes, que son las ya respondidas.
+ */
+function fuentesAntesDe(preguntas: Pregunta[], indice: number): Pregunta[] {
+  return preguntas
+    .slice(0, indice)
+    .filter(
+      (p) =>
+        (p.tipo === "unica" || p.tipo === "multiple") && opcionesPosibles(p).length > 0,
+    );
 }
 
 export function EditorEncuesta({
@@ -60,6 +84,15 @@ export function EditorEncuesta({
 
   const colorDelCliente =
     clientes.find((c) => c.id === clienteId)?.color_hex ?? null;
+
+  /*
+   * Las descripciones van en la misma lista que las preguntas para poder
+   * ordenarlas juntas, pero no se numeran: "Pregunta 3" tiene que ser la
+   * tercera pregunta, no el tercer bloque.
+   */
+  let cuenta = 0;
+  const numeros = preguntas.map((p) => (p.tipo === "nota" ? 0 : (cuenta += 1)));
+  const cuantasPreguntas = cuenta;
 
   /*
    * Guardado automático: se espera a que dejes de escribir un segundo y medio
@@ -94,9 +127,32 @@ export function EditorEncuesta({
   }, [guardar]);
 
   function cambiarPregunta(indice: number, cambios: Partial<Pregunta>) {
-    setPreguntas((actuales) =>
-      actuales.map((p, i) => (i === indice ? { ...p, ...cambios } : p)),
-    );
+    setPreguntas((actuales) => {
+      const antes = actuales[indice];
+      const nuevas = actuales.map((p, i) => (i === indice ? { ...p, ...cambios } : p));
+
+      const idNuevo = cambios.id;
+      if (!antes || !idNuevo || idNuevo === antes.id) return nuevas;
+
+      /*
+       * Cambiar el identificador no puede romper en silencio las reglas que lo
+       * usaban: se renombra también en ellas.
+       */
+      return nuevas.map((p, i) => {
+        if (i === indice) return p;
+        const condicion =
+          p.condicion && p.condicion.pregunta === antes.id
+            ? { ...p.condicion, pregunta: idNuevo }
+            : p.condicion;
+        const opcionesSegun =
+          p.opcionesSegun && p.opcionesSegun.pregunta === antes.id
+            ? { ...p.opcionesSegun, pregunta: idNuevo }
+            : p.opcionesSegun;
+        return condicion === p.condicion && opcionesSegun === p.opcionesSegun
+          ? p
+          : { ...p, condicion, opcionesSegun };
+      });
+    });
   }
 
   function moverPregunta(indice: number, direccion: -1 | 1) {
@@ -359,20 +415,36 @@ export function EditorEncuesta({
 
       {/* Preguntas */}
       <section className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold tracking-tight text-ink">
-            Preguntas ({preguntas.length})
+            Preguntas ({cuantasPreguntas})
           </h2>
-          <button
-            type="button"
-            onClick={() =>
-              setPreguntas((actuales) => [...actuales, preguntaNueva(actuales.length)])
-            }
-            className="rounded-md bg-brand-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
-          >
-            Agregar pregunta
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                setPreguntas((actuales) => [...actuales, notaNueva(actuales.length)])
+              }
+              className="rounded-md border border-ink/15 bg-surface px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-page"
+            >
+              Agregar descripción
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setPreguntas((actuales) => [...actuales, preguntaNueva(actuales.length)])
+              }
+              className="rounded-md bg-brand-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+            >
+              Agregar pregunta
+            </button>
+          </div>
         </div>
+
+        <p className="-mt-2 text-sm text-muted">
+          Una descripción es un bloque de solo texto entre preguntas: sirve para
+          presentar un tema o dar instrucciones, y no se responde.
+        </p>
 
         {preguntas.length === 0 && (
           <p className="rounded-xl border border-dashed border-ink/15 bg-surface px-6 py-10 text-center text-sm text-muted">
@@ -385,7 +457,9 @@ export function EditorEncuesta({
             key={pregunta.id}
             pregunta={pregunta}
             indice={indice}
+            numero={numeros[indice]}
             total={preguntas.length}
+            anteriores={fuentesAntesDe(preguntas, indice)}
             onCambiar={(cambios) => cambiarPregunta(indice, cambios)}
             onMover={(direccion) => moverPregunta(indice, direccion)}
             onQuitar={() =>
@@ -428,20 +502,26 @@ export function EditorEncuesta({
 function EditorPregunta({
   pregunta,
   indice,
+  numero,
   total,
+  anteriores,
   onCambiar,
   onMover,
   onQuitar,
 }: {
   pregunta: Pregunta;
   indice: number;
+  /** Número que le toca entre las preguntas; 0 si es un bloque de texto. */
+  numero: number;
   total: number;
+  anteriores: Pregunta[];
   onCambiar: (cambios: Partial<Pregunta>) => void;
   onMover: (direccion: -1 | 1) => void;
   onQuitar: () => void;
 }) {
   const esEscala = pregunta.tipo === "escala";
   const esTexto = pregunta.tipo === "texto";
+  const esBloqueTexto = pregunta.tipo === "nota";
 
   /** Con cuál de las escalas listas coincide la que está puesta. */
   const preajuste =
@@ -457,7 +537,9 @@ function EditorPregunta({
     <div className={`${cardClass} flex flex-col gap-4`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-          Pregunta {indice + 1} · {ETIQUETA_TIPO[pregunta.tipo]}
+          {esBloqueTexto
+            ? "Bloque de descripción"
+            : `Pregunta ${numero} · ${ETIQUETA_TIPO[pregunta.tipo]}`}
         </span>
         <div className="flex items-center gap-1">
           <button
@@ -488,6 +570,35 @@ function EditorPregunta({
         </div>
       </div>
 
+      {esBloqueTexto ? (
+        <>
+          <label className={labelClass}>
+            Título{" "}
+            <span className="font-normal text-muted">(opcional)</span>
+            <input
+              value={pregunta.texto}
+              onChange={(e) => onCambiar({ texto: e.target.value })}
+              placeholder="Antes de seguir…"
+              className={inputClass}
+            />
+          </label>
+
+          <label className={labelClass}>
+            Texto
+            <textarea
+              rows={5}
+              value={pregunta.descripcion}
+              onChange={(e) => onCambiar({ descripcion: e.target.value })}
+              placeholder="Las siguientes preguntas son sobre tu equipo de trabajo…"
+              className={inputClass}
+            />
+            <span className="text-xs font-normal text-muted">
+              Ocupa su propia pantalla, con un botón para continuar.
+            </span>
+          </label>
+        </>
+      ) : (
+        <>
       <label className={labelClass}>
         Pregunta
         <textarea
@@ -497,6 +608,21 @@ function EditorPregunta({
           placeholder="¿Qué tan de acuerdo estás con…?"
           className={inputClass}
         />
+      </label>
+
+      <label className={labelClass}>
+        Descripción{" "}
+        <span className="font-normal text-muted">(opcional)</span>
+        <textarea
+          rows={2}
+          value={pregunta.descripcion}
+          onChange={(e) => onCambiar({ descripcion: e.target.value })}
+          placeholder="Aclaración o instrucción que acompaña a la pregunta"
+          className={inputClass}
+        />
+        <span className="text-xs font-normal text-muted">
+          Se muestra en letra más pequeña debajo del enunciado.
+        </span>
       </label>
 
       <label className={labelClass}>
@@ -698,6 +824,14 @@ function EditorPregunta({
           )}
         </div>
       )}
+        </>
+      )}
+
+      <ReglasPregunta
+        pregunta={pregunta}
+        anteriores={anteriores}
+        onCambiar={onCambiar}
+      />
     </div>
   );
 }

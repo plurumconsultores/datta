@@ -6,7 +6,32 @@
  * publicarla por la función crear_tabla_respuestas() de Supabase.
  */
 
-export type TipoPregunta = "unica" | "multiple" | "escala" | "texto";
+export type TipoPregunta = "unica" | "multiple" | "escala" | "texto" | "nota";
+
+/** Lo que una persona respondió, por identificador de pregunta. */
+export type Respuestas = Record<string, string | string[] | number>;
+
+/**
+ * Condición para que una pregunta se muestre: se cumple si en la pregunta
+ * indicada marcaron cualquiera de estos valores. Solo puede mirar preguntas
+ * anteriores, que son las que ya están respondidas cuando le llega el turno.
+ */
+export type Condicion = {
+  pregunta: string;
+  valores: string[];
+};
+
+/** Un grupo de la tabla "si respondieron esto, ofrece estas opciones". */
+export type GrupoOpciones = {
+  cuando: string[];
+  opciones: string[];
+};
+
+/** Las opciones de una pregunta, tomadas de lo que respondieron antes. */
+export type OpcionesSegun = {
+  pregunta: string;
+  grupos: GrupoOpciones[];
+};
 
 export type Escala = {
   min: number;
@@ -23,6 +48,8 @@ export type Pregunta = {
    */
   id: string;
   texto: string;
+  /** Texto de apoyo opcional, debajo del enunciado. En una nota, es el cuerpo. */
+  descripcion: string;
   tipo: TipoPregunta;
   obligatoria: boolean;
   /** Para opción única y múltiple. */
@@ -35,6 +62,10 @@ export type Pregunta = {
   textoLargo: boolean;
   /** Para texto abierto: tope de caracteres. 0 = el tope general. */
   maxCaracteres: number;
+  /** Si no es null, la pregunta solo se muestra cuando la condición se cumple. */
+  condicion: Condicion | null;
+  /** Si no es null, las opciones dependen de una respuesta anterior. */
+  opcionesSegun: OpcionesSegun | null;
 };
 
 /** Nadie escribe un ensayo en una encuesta, y sin tope la base sufre. */
@@ -160,6 +191,42 @@ function entero(valor: unknown, porDefecto: number): number {
   return Number.isFinite(n) ? Math.round(n) : porDefecto;
 }
 
+function listaDeTextos(valor: unknown): string[] {
+  const lista = Array.isArray(valor) ? valor.map((x) => texto(x).trim()) : [];
+  return lista.filter((x, i) => x !== "" && lista.indexOf(x) === i);
+}
+
+/** Una condición sin pregunta o sin valores no es una condición: es null. */
+export function normalizarCondicion(cruda: unknown): Condicion | null {
+  if (typeof cruda !== "object" || cruda === null) return null;
+  const c = cruda as Record<string, unknown>;
+  const pregunta = texto(c.pregunta).trim();
+  const valores = listaDeTextos(c.valores);
+  if (!pregunta || valores.length === 0) return null;
+  return { pregunta, valores };
+}
+
+/** Igual: una tabla de opciones a medio llenar se guarda como null. */
+export function normalizarOpcionesSegun(cruda: unknown): OpcionesSegun | null {
+  if (typeof cruda !== "object" || cruda === null) return null;
+  const o = cruda as Record<string, unknown>;
+  const pregunta = texto(o.pregunta).trim();
+  const grupos = (Array.isArray(o.grupos) ? o.grupos : [])
+    .map((g) => {
+      const grupo = (typeof g === "object" && g !== null ? g : {}) as Record<
+        string,
+        unknown
+      >;
+      return {
+        cuando: listaDeTextos(grupo.cuando),
+        opciones: listaDeTextos(grupo.opciones),
+      };
+    })
+    .filter((g) => g.cuando.length > 0 && g.opciones.length > 0);
+  if (!pregunta || grupos.length === 0) return null;
+  return { pregunta, grupos };
+}
+
 /** Deja una pregunta en forma canónica, venga de donde venga. */
 export function normalizarPregunta(cruda: unknown, indice: number): Pregunta {
   const p = (typeof cruda === "object" && cruda !== null ? cruda : {}) as Record<
@@ -168,7 +235,10 @@ export function normalizarPregunta(cruda: unknown, indice: number): Pregunta {
   >;
 
   const tipo: TipoPregunta =
-    p.tipo === "multiple" || p.tipo === "escala" || p.tipo === "texto"
+    p.tipo === "multiple" ||
+    p.tipo === "escala" ||
+    p.tipo === "texto" ||
+    p.tipo === "nota"
       ? p.tipo
       : "unica";
 
@@ -182,8 +252,10 @@ export function normalizarPregunta(cruda: unknown, indice: number): Pregunta {
   return {
     id: texto(p.id) || `p${indice + 1}`,
     texto: texto(p.texto),
+    descripcion: texto(p.descripcion),
     tipo,
-    obligatoria: p.obligatoria !== false,
+    // Una nota no se responde, así que nunca es obligatoria.
+    obligatoria: tipo === "nota" ? false : p.obligatoria !== false,
     opciones: Array.isArray(p.opciones)
       ? p.opciones.map((o) => texto(o)).filter(Boolean)
       : [],
@@ -204,7 +276,102 @@ export function normalizarPregunta(cruda: unknown, indice: number): Pregunta {
       Math.max(0, entero(p.maxCaracteres, 0)) || MAX_CARACTERES,
       MAX_CARACTERES,
     ),
+    condicion: normalizarCondicion(p.condicion),
+    opcionesSegun:
+      tipo === "unica" || tipo === "multiple"
+        ? normalizarOpcionesSegun(p.opcionesSegun)
+        : null,
   };
+}
+
+/** Las que piden respuesta: las notas son solo texto en medio del camino. */
+export function preguntasReales(preguntas: Pregunta[]): Pregunta[] {
+  return preguntas.filter((p) => p.tipo !== "nota");
+}
+
+/** ¿La respuesta guardada incluye alguno de estos valores? */
+function coincide(valor: unknown, valores: string[]): boolean {
+  if (valor === undefined || valor === null || valor === "") return false;
+  if (Array.isArray(valor)) return valor.some((v) => valores.includes(String(v)));
+  return valores.includes(String(valor));
+}
+
+/** Si la pregunta se le muestra a alguien que respondió esto. */
+export function preguntaVisible(pregunta: Pregunta, respuestas: Respuestas): boolean {
+  if (!pregunta.condicion) return true;
+  return coincide(respuestas[pregunta.condicion.pregunta], pregunta.condicion.valores);
+}
+
+/**
+ * Las opciones que le toca ver a quien respondió esto. Sin regla, las de
+ * siempre; con regla, la suma de los grupos que coincidan.
+ */
+export function opcionesVisibles(pregunta: Pregunta, respuestas: Respuestas): string[] {
+  const regla = pregunta.opcionesSegun;
+  if (!regla || (pregunta.tipo !== "unica" && pregunta.tipo !== "multiple")) {
+    return pregunta.opciones;
+  }
+
+  const valor = respuestas[regla.pregunta];
+  const salida: string[] = [];
+  for (const grupo of regla.grupos) {
+    if (!coincide(valor, grupo.cuando)) continue;
+    for (const opcion of grupo.opciones) {
+      if (!salida.includes(opcion)) salida.push(opcion);
+    }
+  }
+
+  /*
+   * Si ningún grupo coincide se usan las opciones de siempre: así una
+   * respuesta que nadie previó no deja la pregunta en blanco.
+   */
+  return salida.length > 0 ? salida : pregunta.opciones;
+}
+
+/** Todas las opciones que la pregunta podría llegar a mostrar. */
+export function opcionesPosibles(pregunta: Pregunta): string[] {
+  const salida = [...pregunta.opciones];
+  for (const grupo of pregunta.opcionesSegun?.grupos ?? []) {
+    for (const opcion of grupo.opciones) {
+      if (!salida.includes(opcion)) salida.push(opcion);
+    }
+  }
+  return salida;
+}
+
+/**
+ * Quita las respuestas que dejaron de tener sentido: las de preguntas que se
+ * ocultaron y las opciones que ya no se ofrecen. Se recorre en orden, porque
+ * una condición solo mira preguntas anteriores. Se usa al cambiar una
+ * respuesta hacia atrás, para no guardar una rama que ya no se recorrió.
+ */
+export function depurarRespuestas(
+  preguntas: Pregunta[],
+  respuestas: Respuestas,
+): Respuestas {
+  const limpias: Respuestas = {};
+
+  for (const pregunta of preguntas) {
+    if (pregunta.tipo === "nota") continue;
+    if (!preguntaVisible(pregunta, limpias)) continue;
+
+    const valor = respuestas[pregunta.id];
+    if (valor === undefined) continue;
+
+    if (pregunta.tipo === "unica" || pregunta.tipo === "multiple") {
+      const permitidas = opcionesVisibles(pregunta, limpias);
+      if (Array.isArray(valor)) {
+        const quedan = valor.filter((v) => permitidas.includes(v));
+        if (quedan.length > 0) limpias[pregunta.id] = quedan;
+        continue;
+      }
+      if (typeof valor === "string" && !permitidas.includes(valor)) continue;
+    }
+
+    limpias[pregunta.id] = valor;
+  }
+
+  return limpias;
 }
 
 export function normalizarPreguntas(crudas: unknown): Pregunta[] {
@@ -328,7 +495,7 @@ export function analizarCompatibilidad(
     return avisos;
   }
 
-  const porId = new Map(preguntas.map((p) => [p.id, p]));
+  const porId = new Map(preguntasReales(preguntas).map((p) => [p.id, p]));
 
   for (const variable of variablesTablero) {
     const pregunta = porId.get(variable.clave);
@@ -361,7 +528,23 @@ export function analizarCompatibilidad(
       continue;
     }
 
-    const sinCubrir = variable.valores.filter((v) => !pregunta.opciones.includes(v));
+    const posibles = opcionesPosibles(pregunta);
+
+    if (pregunta.opcionesSegun) {
+      avisos.push({
+        nivel: "aviso",
+        texto: `Las opciones de "${pregunta.texto || pregunta.id}" dependen de una respuesta anterior, así que no todas aparecen en cada respuesta.`,
+      });
+    }
+
+    if (pregunta.condicion) {
+      avisos.push({
+        nivel: "aviso",
+        texto: `"${pregunta.texto || pregunta.id}" solo se le muestra a quien cumple una condición: el tablero recibirá menos respuestas en esa variable que en el resto.`,
+      });
+    }
+
+    const sinCubrir = variable.valores.filter((v) => !posibles.includes(v));
     if (sinCubrir.length > 0) {
       avisos.push({
         nivel: "aviso",
@@ -369,7 +552,7 @@ export function analizarCompatibilidad(
       });
     }
 
-    const sinUsar = pregunta.opciones.filter((o) => !variable.valores.includes(o));
+    const sinUsar = posibles.filter((o) => !variable.valores.includes(o));
     if (sinUsar.length > 0) {
       avisos.push({
         nivel: "aviso",
@@ -386,6 +569,7 @@ export const ETIQUETA_TIPO: Record<TipoPregunta, string> = {
   multiple: "Opción múltiple",
   escala: "Escala",
   texto: "Texto abierto",
+  nota: "Descripción",
 };
 
 /** Los números de una escala, para dibujar los botones. */
@@ -399,7 +583,14 @@ export function puntosDeEscala(escala: Escala): number[] {
  * Comprueba una respuesta contra su pregunta. Se usa en el servidor al
  * recibirla: lo que llega del navegador no es de fiar.
  */
-export function respuestaValida(pregunta: Pregunta, valor: unknown): boolean {
+export function respuestaValida(
+  pregunta: Pregunta,
+  valor: unknown,
+  respuestas: Respuestas = {},
+): boolean {
+  // Una nota no se responde: no hay nada que comprobar.
+  if (pregunta.tipo === "nota") return true;
+
   if (valor === null || valor === undefined || valor === "") {
     return !pregunta.obligatoria;
   }
@@ -411,13 +602,20 @@ export function respuestaValida(pregunta: Pregunta, valor: unknown): boolean {
     return limpio.length <= (pregunta.maxCaracteres || MAX_CARACTERES);
   }
 
+  /*
+   * Las opciones válidas dependen de lo que la persona respondió antes: si la
+   * pregunta tiene una tabla de opciones, se comprueba contra la lista que le
+   * tocaba ver, no contra todas las que existen.
+   */
+  const permitidas = opcionesVisibles(pregunta, respuestas);
+
   if (pregunta.tipo === "unica") {
-    return typeof valor === "string" && pregunta.opciones.includes(valor);
+    return typeof valor === "string" && permitidas.includes(valor);
   }
 
   if (pregunta.tipo === "multiple") {
     if (!Array.isArray(valor)) return false;
-    if (valor.some((v) => typeof v !== "string" || !pregunta.opciones.includes(v))) {
+    if (valor.some((v) => typeof v !== "string" || !permitidas.includes(v))) {
       return false;
     }
     if (pregunta.obligatoria && valor.length === 0) return false;

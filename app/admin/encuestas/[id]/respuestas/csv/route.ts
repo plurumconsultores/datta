@@ -1,5 +1,5 @@
 import { requireEquipo } from "@/lib/auth";
-import { normalizarPreguntas, tablaDe } from "@/lib/encuestas";
+import { normalizarPreguntas, preguntasReales, tablaDe } from "@/lib/encuestas";
 
 const PASO = 1000;
 const TOPE = 100000;
@@ -43,7 +43,7 @@ export async function GET(
     return new Response("No encontrada", { status: 404 });
   }
 
-  const preguntas = normalizarPreguntas(encuesta.preguntas);
+  const preguntas = preguntasReales(normalizarPreguntas(encuesta.preguntas));
   const tabla = encuesta.tabla_respuestas ?? tablaDe(encuesta.slug);
 
   const filas: { id: number; creado_en: string; respuestas: Record<string, unknown> }[] =

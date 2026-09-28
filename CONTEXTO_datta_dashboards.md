@@ -171,6 +171,46 @@ tablero conectado solo puede contar cuántos respondieron. Por eso, si un tabler
 una variable y en la encuesta es de texto abierto, el análisis de compatibilidad lo marca
 en rojo.
 
+### Descripciones (bloques de texto)
+
+Además de preguntas, la lista admite bloques de **descripción** (`tipo: "nota"`): solo
+texto, con título opcional, que ocupan su propia pantalla con un botón para continuar.
+Sirven para presentar una sección o dar instrucciones. Van en el mismo arreglo
+`preguntas` para poder ordenarlos entre las preguntas, pero **no se responden**: no se
+numeran, no entran al CSV ni a la tabla de respuestas, no las ve el API del tablero y el
+análisis de compatibilidad las ignora. En el código eso lo hace `preguntasReales()`.
+
+Cada pregunta tiene además su propia **descripción** opcional, que se muestra en letra más
+pequeña debajo del enunciado.
+
+### Preguntas condicionales
+
+Una pregunta puede depender de una respuesta anterior de dos maneras, y las dos se
+configuran en el bloque plegable *Cuándo se muestra y qué opciones ofrece*:
+
+- **Condición de visibilidad** (`condicion`): se muestra solo si en una pregunta anterior
+  marcaron alguna de las opciones elegidas. Si no, la encuesta la salta.
+- **Opciones según una respuesta anterior** (`opcionesSegun`): la pregunta aparece
+  siempre, pero su lista de opciones sale de grupos "si respondieron esto → muestra
+  estas". Si la respuesta no cae en ningún grupo, se usan las opciones normales de la
+  pregunta, que funcionan como respaldo.
+
+Reglas de la implementación, para no romperlas después:
+
+- Una regla **solo puede mirar hacia atrás**. Al publicar se comprueba; si apunta a una
+  pregunta posterior, no publica y dice cuál mover. El editor también lo avisa en rojo si
+  reordenas y una regla queda apuntando hacia adelante.
+- La base de una regla solo puede ser una pregunta de opción única o múltiple: la
+  condición se define marcando opciones.
+- Renombrar el identificador de una pregunta renombra también las reglas que lo usaban.
+- Al volver atrás y cambiar la respuesta que abría una rama, lo contestado en esa rama se
+  descarta (`depurarRespuestas`), en el navegador y otra vez en el servidor.
+- El servidor recorre las preguntas en orden acumulando lo aceptado: una respuesta a una
+  pregunta que no aplicaba no se guarda, y una opción que no le tocaba se rechaza
+  (`preguntaVisible` y `opcionesVisibles`, en `lib/encuestas.ts`).
+- En el tablero conectado, una variable que viene de una pregunta condicional trae menos
+  respuestas que el resto: el análisis de compatibilidad lo avisa en ámbar.
+
 ### Requisitos
 
 - Correr `scripts/encuestas.sql` una vez en Supabase.

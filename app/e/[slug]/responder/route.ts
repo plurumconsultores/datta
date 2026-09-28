@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   normalizarPreguntas,
+  preguntaVisible,
+  preguntasReales,
   respuestaValida,
   tablaDe,
+  type Respuestas,
 } from "@/lib/encuestas";
 
 /*
@@ -50,18 +53,27 @@ export async function POST(
   }
 
   const preguntas = normalizarPreguntas(encuesta.preguntas);
-  const limpias: Record<string, unknown> = {};
+  const limpias: Respuestas = {};
 
+  /*
+   * Se recorre en orden y se van acumulando las respuestas ya aceptadas: son
+   * las que deciden si la pregunta siguiente aplicaba y qué opciones le
+   * tocaban. Lo de una pregunta que no aplicaba no se guarda, aunque el
+   * navegador lo mande.
+   */
   for (const pregunta of preguntas) {
+    if (pregunta.tipo === "nota") continue;
+    if (!preguntaVisible(pregunta, limpias)) continue;
+
     const valor = (enviadas as Record<string, unknown>)[pregunta.id];
-    if (!respuestaValida(pregunta, valor)) {
+    if (!respuestaValida(pregunta, valor, limpias)) {
       return NextResponse.json(
         { error: `Respuesta inválida en "${pregunta.texto}"` },
         { status: 422 },
       );
     }
     if (valor !== undefined && valor !== null && valor !== "") {
-      limpias[pregunta.id] = valor;
+      limpias[pregunta.id] = valor as string | string[] | number;
     }
   }
 
@@ -70,7 +82,10 @@ export async function POST(
   const { error } = await admin.from(tabla).insert({
     respuestas: limpias,
     // Sin IP ni nada que identifique: la encuesta se ofrece como anónima.
-    meta: { version_preguntas: preguntas.length, enviado_en: new Date().toISOString() },
+    meta: {
+      version_preguntas: preguntasReales(preguntas).length,
+      enviado_en: new Date().toISOString(),
+    },
   });
 
   if (error) {

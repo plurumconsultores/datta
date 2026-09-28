@@ -12,6 +12,8 @@ import {
   normalizarDespedida,
   normalizarPreguntas,
   normalizarTema,
+  opcionesPosibles,
+  preguntasReales,
   slugValido,
   type Bienvenida,
   type Despedida,
@@ -127,16 +129,49 @@ export async function publicarEncuesta(id: string) {
   if (lectura || !encuesta) throw new Error(lectura?.message ?? "No se encontró la encuesta.");
 
   const preguntas = normalizarPreguntas(encuesta.preguntas);
-  if (preguntas.length === 0) {
+  if (preguntasReales(preguntas).length === 0) {
     throw new Error("Agrega al menos una pregunta antes de publicar.");
   }
-  const sinTexto = preguntas.find((p) => !p.texto.trim());
+
+  const bloqueVacio = preguntas.find(
+    (p) => p.tipo === "nota" && !p.texto.trim() && !p.descripcion.trim(),
+  );
+  if (bloqueVacio) {
+    throw new Error("Hay un bloque de descripción sin texto: escríbelo o quítalo.");
+  }
+
+  const sinTexto = preguntasReales(preguntas).find((p) => !p.texto.trim());
   if (sinTexto) throw new Error("Hay una pregunta sin texto.");
-  const sinOpciones = preguntas.find(
-    (p) => p.tipo !== "escala" && p.tipo !== "texto" && p.opciones.length < 2,
+
+  const sinOpciones = preguntasReales(preguntas).find(
+    (p) =>
+      p.tipo !== "escala" && p.tipo !== "texto" && opcionesPosibles(p).length < 2,
   );
   if (sinOpciones) {
     throw new Error(`"${sinOpciones.texto}" necesita al menos dos opciones.`);
+  }
+
+  /*
+   * Una regla solo puede mirar hacia atrás: si apunta a una pregunta que va
+   * después (o que ya no existe), nunca se cumpliría y la pregunta quedaría
+   * invisible sin que nadie se enterara.
+   */
+  const previas = new Set<string>();
+  for (const pregunta of preguntas) {
+    const nombre = pregunta.texto.trim() || pregunta.id;
+
+    if (pregunta.condicion && !previas.has(pregunta.condicion.pregunta)) {
+      throw new Error(
+        `La condición de "${nombre}" apunta a una pregunta que no va antes que ella. Muévela o cambia la condición.`,
+      );
+    }
+    if (pregunta.opcionesSegun && !previas.has(pregunta.opcionesSegun.pregunta)) {
+      throw new Error(
+        `Las opciones de "${nombre}" dependen de una pregunta que no va antes que ella. Muévela o cambia la regla.`,
+      );
+    }
+
+    if (pregunta.tipo !== "nota") previas.add(pregunta.id);
   }
 
   const { data: tabla, error: rpc } = await supabase.rpc("crear_tabla_respuestas", {
