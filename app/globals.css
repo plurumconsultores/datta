@@ -122,11 +122,171 @@ body {
   );
 }
 
-.degradado-login {
+/* ===========================================================================
+   Inicio de sesión (app/login/page.tsx)
+   Los cuatro colores de Plurum se van relevando por toda la pantalla: cada
+   uno en su capa, con un fundido de dos segundos justo en el cambio. Los
+   degradados no se pueden interpolar, pero la opacidad sí, y así la
+   transición es limpia. Ciclo completo: 40 s, diez por color, y el mismo
+   reloj lo comparten las marcas de agua, la medalla del isotipo y el botón.
+   =========================================================================== */
+
+/*
+ * Registrar la variable es lo que permite que el color de las marcas de agua
+ * se funda en vez de saltar. Donde el navegador no lo soporte, se queda en el
+ * lima de marca y no pasa nada más.
+ */
+@property --tinte-sello {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #80bc00;
+}
+
+.login-escena {
   background:
-    radial-gradient(120% 90% at 85% 10%, rgba(35, 232, 232, 0.28), transparent 60%),
-    radial-gradient(90% 80% at 10% 95%, rgba(128, 188, 0, 0.35), transparent 62%),
-    linear-gradient(155deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-800) 100%);
+    radial-gradient(85% 70% at 18% 0%, #5c9434 0%, transparent 58%),
+    radial-gradient(80% 80% at 92% 100%, #244013 0%, transparent 62%),
+    linear-gradient(160deg, var(--brand-900) 0%, var(--brand-700) 58%, var(--brand-800) 100%);
+  animation: login-tintar 40s linear infinite;
+}
+
+.login-capa {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  animation: login-turno 40s linear infinite;
+}
+
+.login-capa-verde {
+  animation-delay: 0s;
+  background:
+    radial-gradient(85% 70% at 18% 0%, #5c9434 0%, transparent 58%),
+    radial-gradient(80% 80% at 92% 100%, #244013 0%, transparent 62%),
+    linear-gradient(160deg, #487629 0%, #3b6220 58%, #2e4d18 100%);
+}
+
+.login-capa-lima {
+  animation-delay: 10s;
+  background:
+    radial-gradient(85% 70% at 18% 0%, #8fbd12 0%, transparent 58%),
+    radial-gradient(80% 80% at 92% 100%, #28460a 0%, transparent 62%),
+    linear-gradient(160deg, #5f8f12 0%, #47700d 58%, #2f4f08 100%);
+}
+
+.login-capa-ambar {
+  animation-delay: 20s;
+  background:
+    radial-gradient(85% 70% at 18% 0%, #e09a08 0%, transparent 58%),
+    radial-gradient(80% 80% at 92% 100%, #422903 0%, transparent 62%),
+    linear-gradient(160deg, #a76a08 0%, #7d4e05 58%, #402903 100%);
+}
+
+.login-capa-cian {
+  animation-delay: 30s;
+  background:
+    radial-gradient(85% 70% at 18% 0%, #23c9d6 0%, transparent 58%),
+    radial-gradient(80% 80% at 92% 100%, #062730 0%, transparent 62%),
+    linear-gradient(160deg, #14707d 0%, #0e5560 58%, #093642 100%);
+}
+
+@keyframes login-turno {
+  0% { opacity: 0; }
+  5% { opacity: 1; }
+  25% { opacity: 1; }
+  30% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* El color de las marcas de agua va un color por delante del fondo, para que
+   nunca se pierdan contra él. */
+@keyframes login-tintar {
+  0%, 20% { --tinte-sello: #80bc00; }
+  27%, 45% { --tinte-sello: #ffa000; }
+  52%, 70% { --tinte-sello: #23e8e8; }
+  77%, 95% { --tinte-sello: #a8e05a; }
+  100% { --tinte-sello: #80bc00; }
+}
+
+/*
+ * Lo que se toca —la medalla de la carita y el botón— lleva el color del
+ * momento como color plano animado, que sí se interpola, con un brillo fijo
+ * encima que le da el relieve. Los cuatro tonos son las versiones profundas
+ * de la marca: con el lima y el ámbar planos, el texto blanco encima no
+ * llegaba al contraste mínimo.
+ */
+.login-color {
+  background-color: #487629;
+  background-image: linear-gradient(145deg, rgba(255, 255, 255, 0.26), rgba(0, 0, 0, 0.22));
+  animation: login-color 40s linear infinite;
+}
+
+.login-color-boton {
+  background-image: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.04) 42%,
+    rgba(0, 0, 0, 0.14)
+  );
+}
+
+@keyframes login-color {
+  0% { background-color: #14707d; }
+  5%, 25% { background-color: #487629; }
+  30%, 50% { background-color: #527d0c; }
+  55%, 75% { background-color: #935c06; }
+  80%, 100% { background-color: #14707d; }
+}
+
+/* Velo oscuro en el centro: sostiene el contraste del logotipo blanco en los
+   cuatro colores (el ámbar y el lima son claros) y asienta la tarjeta. */
+.login-velo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    72% 58% at 50% 46%,
+    rgba(9, 18, 5, 0.34),
+    rgba(9, 18, 5, 0.12) 62%,
+    transparent 78%
+  );
+}
+
+/* Una luz que respira muy despacio, para que la pantalla nunca se sienta
+   congelada aunque nadie la toque. */
+.login-respira {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background: radial-gradient(45% 45% at 50% 42%, rgba(128, 188, 0, 0.3), transparent 70%);
+  animation: login-respirar 14s ease-in-out infinite alternate;
+}
+
+@keyframes login-respirar {
+  from { opacity: 0.45; transform: scale(0.92); }
+  to { opacity: 0.85; transform: scale(1.08); }
+}
+
+.login-tarjeta {
+  animation: login-entrar 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes login-entrar {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-escena,
+  .login-capa,
+  .login-respira,
+  .login-tarjeta,
+  .login-color {
+    animation: none;
+  }
+  .login-capa-verde {
+    opacity: 1;
+  }
 }
 
 /* Pestañas desplegables (<details>): se oculta el triángulo nativo, porque
@@ -157,33 +317,46 @@ summary::-webkit-details-marker {
  * despacio de derecha a izquierda. Cada una entra pequeña y nítida, crece y se
  * va difuminando hasta desaparecer.
  */
+/*
+ * left: 0 fija el punto de partida. Sin eso, al ser absolutas dentro de un
+ * contenedor centrado, arrancaban desde la mitad de la pantalla y se apagaban
+ * ahí mismo: nunca cruzaban la mitad derecha. Ahora entran pegadas al borde
+ * derecho, atraviesan la pantalla entera y se difuminan al salir por la
+ * izquierda.
+ *
+ * El color sale de --tinte-sello: en la pantalla de carga se queda en el lima
+ * de marca, y en el inicio de sesión va cambiando con el fondo.
+ */
 .carga-sello {
   position: absolute;
+  left: 0;
   height: auto;
-  fill: var(--brand-400);
+  fill: var(--tinte-sello, var(--brand-400));
   opacity: 0;
   pointer-events: none;
   will-change: transform, opacity, filter;
-  animation: carga-cruzar-izquierda 26s linear infinite;
+  animation: carga-cruzar-izquierda 32s linear infinite;
 }
 
 @keyframes carga-cruzar-izquierda {
   0% {
-    transform: translate3d(75vw, 0, 0) rotate(var(--giro, 0deg)) scale(0.65);
+    transform: translate3d(102vw, 0, 0) rotate(var(--giro, 0deg)) scale(0.6);
     opacity: 0;
     filter: blur(0);
   }
-  12% {
+  7% {
     opacity: var(--op, 0.12);
   }
-  62% {
+  72% {
+    filter: blur(4px);
+  }
+  90% {
     opacity: var(--op, 0.12);
-    filter: blur(3px);
   }
   100% {
-    transform: translate3d(-30vw, -6vh, 0) rotate(calc(var(--giro, 0deg) + 14deg)) scale(1.75);
+    transform: translate3d(-60vw, -8vh, 0) rotate(calc(var(--giro, 0deg) + 16deg)) scale(1.95);
     opacity: 0;
-    filter: blur(16px);
+    filter: blur(15px);
   }
 }
 

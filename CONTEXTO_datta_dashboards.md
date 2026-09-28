@@ -75,6 +75,24 @@ push a `main`, y Vercel construye. Dos cosas aprendidas por experiencia:
 - Para diagnosticar: abrir la **URL propia del despliegue** y compararla con el dominio.
   Si funciona en una y no en la otra, el problema es el enrutamiento del dominio, no el build.
 
+## Inicio de sesión y pantalla de carga (sept 2026)
+
+Las dos comparten lenguaje: fondo de marca, isotipos cruzando como marcas de agua y la
+carita del `:p` que gira, guiña y vuelve (5,2 s por ciclo).
+
+- El **login** (`app/login/page.tsx` + `app/login/FondoPlurum.tsx`) recorre los cuatro
+  colores de Plurum en 40 s, diez por color. El fondo son cuatro capas que se funden
+  —los degradados no se interpolan, la opacidad sí—; la medalla del isotipo y el botón
+  usan color plano animado con el mismo reloj, en las versiones profundas de cada color
+  para que el blanco encima pase 4,5:1. Las marcas de agua toman su color de
+  `--tinte-sello`, registrada con `@property`.
+- La **pantalla de carga** (`app/components/VisorTablero.tsx`) usa el mismo `.carga-sello`.
+  Ahí la carita sí se dispara a mano con `beginElement()`, porque la pantalla aparece a
+  mitad del reloj de la página y si no, la carita saldría ya girada.
+- Las marcas de agua llevan `left: 0`: sin eso arrancan desde su posición estática —el
+  centro— y se apagan a media pantalla.
+- Las dos respetan `prefers-reduced-motion`.
+
 ## Tableros publicados
 
 | Slug | Título |

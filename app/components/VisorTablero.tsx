@@ -99,8 +99,9 @@ function IsotipoPlurum({
 }
 
 /**
- * Isotipos de fondo: entran por la derecha, cruzan despacio hacia la
- * izquierda creciendo, y se difuminan hasta desaparecer.
+ * Isotipos de fondo: entran por el borde derecho, cruzan la pantalla entera
+ * hacia la izquierda creciendo, y se difuminan al salir por el otro lado.
+ * Las duraciones son largas porque el recorrido es de lado a lado.
  */
 /**
  * Lo que tarda la carita en girar, guiñar y volver a su posición: la pantalla
@@ -110,20 +111,20 @@ function IsotipoPlurum({
 const CICLO_CARITA = 5200;
 
 const SELLOS = [
-  { top: "4%", tamano: 190, giro: "-12deg", opacidad: 0.14, retraso: "0s", duracion: "26s" },
-  { top: "12%", tamano: 110, giro: "22deg", opacidad: 0.09, retraso: "-19s", duracion: "31s" },
-  { top: "20%", tamano: 150, giro: "18deg", opacidad: 0.12, retraso: "-4s", duracion: "30s" },
-  { top: "27%", tamano: 90, giro: "-30deg", opacidad: 0.08, retraso: "-11s", duracion: "21s" },
-  { top: "34%", tamano: 210, giro: "-4deg", opacidad: 0.11, retraso: "-22s", duracion: "35s" },
-  { top: "41%", tamano: 120, giro: "12deg", opacidad: 0.1, retraso: "-6s", duracion: "24s" },
-  { top: "48%", tamano: 250, giro: "8deg", opacidad: 0.1, retraso: "-7s", duracion: "34s" },
-  { top: "55%", tamano: 100, giro: "-18deg", opacidad: 0.09, retraso: "-27s", duracion: "28s" },
-  { top: "60%", tamano: 170, giro: "-22deg", opacidad: 0.13, retraso: "-13s", duracion: "25s" },
-  { top: "68%", tamano: 130, giro: "30deg", opacidad: 0.11, retraso: "-18s", duracion: "22s" },
-  { top: "74%", tamano: 200, giro: "5deg", opacidad: 0.1, retraso: "-2s", duracion: "33s" },
-  { top: "81%", tamano: 110, giro: "-9deg", opacidad: 0.09, retraso: "-15s", duracion: "27s" },
-  { top: "88%", tamano: 160, giro: "24deg", opacidad: 0.12, retraso: "-9s", duracion: "23s" },
-  { top: "-6%", tamano: 140, giro: "-26deg", opacidad: 0.1, retraso: "-24s", duracion: "29s" },
+  { top: "4%", tamano: 190, giro: "-12deg", opacidad: 0.14, retraso: "0s", duracion: "38s" },
+  { top: "12%", tamano: 110, giro: "22deg", opacidad: 0.09, retraso: "-19s", duracion: "45s" },
+  { top: "20%", tamano: 150, giro: "18deg", opacidad: 0.12, retraso: "-4s", duracion: "44s" },
+  { top: "27%", tamano: 90, giro: "-30deg", opacidad: 0.08, retraso: "-11s", duracion: "30s" },
+  { top: "34%", tamano: 210, giro: "-4deg", opacidad: 0.11, retraso: "-22s", duracion: "51s" },
+  { top: "41%", tamano: 120, giro: "12deg", opacidad: 0.1, retraso: "-6s", duracion: "35s" },
+  { top: "48%", tamano: 250, giro: "8deg", opacidad: 0.1, retraso: "-7s", duracion: "49s" },
+  { top: "55%", tamano: 100, giro: "-18deg", opacidad: 0.09, retraso: "-27s", duracion: "41s" },
+  { top: "60%", tamano: 170, giro: "-22deg", opacidad: 0.13, retraso: "-13s", duracion: "36s" },
+  { top: "68%", tamano: 130, giro: "30deg", opacidad: 0.11, retraso: "-18s", duracion: "32s" },
+  { top: "74%", tamano: 200, giro: "5deg", opacidad: 0.1, retraso: "-2s", duracion: "48s" },
+  { top: "81%", tamano: 110, giro: "-9deg", opacidad: 0.09, retraso: "-15s", duracion: "39s" },
+  { top: "88%", tamano: 160, giro: "24deg", opacidad: 0.12, retraso: "-9s", duracion: "33s" },
+  { top: "-6%", tamano: 140, giro: "-26deg", opacidad: 0.1, retraso: "-24s", duracion: "42s" },
 ];
 
 /**
