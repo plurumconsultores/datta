@@ -2,8 +2,16 @@
 -- Encuesta EXCO - 2026 (Banconal) — preguntas del instrumento
 -- =====================================================================
 -- Carga las 6 preguntas demográficas (con las opciones que se desglosan de
--- la respuesta anterior) y las 42 preguntas de la batería final, en escala
--- de 0 a 10.
+-- la respuesta anterior), las 42 preguntas de la batería final y las 5
+-- preguntas ANCLA, todas en escala de 0 a 10.
+--
+-- Ajustes del 29-sep-2026 (correo de Vanessa Hernández, Banconal):
+--   - Se agregan las 5 ANCLAS al final (ancla_1 a ancla_5); la 4 dice
+--     "comprometido/a" y no "motivado/a".
+--   - "Gobernanza y Gestión de TI" queda solo bajo Innovación y Tecnología
+--     (se quita de Negocios).
+--   - Se quita "Banco Nacional de Panamá" de los lugares de trabajo.
+--   - La bienvenida dice "Banco Nacional de Panamá" completo (paso 3b).
 --
 -- Cómo usarlo: pegar este archivo completo en el SQL Editor de Supabase
 -- (proyecto de Datta) y ejecutar. Son cuatro pasos; el último confirma.
@@ -46,7 +54,8 @@ select id, titulo, preguntas
 
 -- ---------------------------------------------------------------------
 -- 3) Las preguntas.
---    Orden: descripción + 6 demográficas + descripción + 42 de la batería.
+--    Orden: descripción + 6 demográficas + descripción + 42 de la batería
+--    + descripción + 5 anclas.
 --    Las reglas van dentro de cada pregunta:
 --      "condicion"     -> solo se muestra si la respuesta anterior es una de esas
 --      "opcionesSegun" -> sus opciones salen de lo que respondieron antes
@@ -251,7 +260,6 @@ update public.encuestas
             "Contratos y Soporte al Negocio",
             "Fideicomisos",
             "Gestión de Negocios",
-            "Gobernanza y Gestión de TI",
             "Instituciones Financieras y Proyectos Especiales",
             "Subgerencia General de Negocios"
           ]
@@ -1189,7 +1197,6 @@ update public.encuestas
       "Anclas Mall",
       "Antón",
       "Balboa",
-      "Banco Nacional de Panamá",
       "Belén",
       "Bocas del Toro (Isla Colón)",
       "Boquerón",
@@ -1379,7 +1386,6 @@ update public.encuestas
             "Anclas Mall",
             "Antón",
             "Balboa",
-            "Banco Nacional de Panamá",
             "Belén",
             "Brisas del Glof",
             "C.A.I.P.I.",
@@ -2314,6 +2320,120 @@ update public.encuestas
     "maxCaracteres": 500,
     "condicion": null,
     "opcionesSegun": null
+  },
+  {
+    "id": "nota_anclas",
+    "texto": "Para terminar, cinco preguntas generales",
+    "descripcion": "Responde de 0 a 10, según lo que describa mejor tu experiencia hoy.",
+    "tipo": "nota",
+    "obligatoria": false,
+    "opciones": [],
+    "maxOpciones": 0,
+    "escala": {
+      "min": 1,
+      "max": 5,
+      "etiquetaMin": "Totalmente en desacuerdo",
+      "etiquetaMax": "Totalmente de acuerdo"
+    },
+    "textoLargo": true,
+    "maxCaracteres": 500,
+    "condicion": null,
+    "opcionesSegun": null
+  },
+  {
+    "id": "ancla_1",
+    "texto": "¿Qué tan probable es que recomiendes Banconal como un buen lugar para trabajar?",
+    "descripcion": "",
+    "tipo": "escala",
+    "obligatoria": true,
+    "opciones": [],
+    "maxOpciones": 0,
+    "escala": {
+      "min": 0,
+      "max": 10,
+      "etiquetaMin": "Nada probable",
+      "etiquetaMax": "Muy probable"
+    },
+    "textoLargo": true,
+    "maxCaracteres": 500,
+    "condicion": null,
+    "opcionesSegun": null
+  },
+  {
+    "id": "ancla_2",
+    "texto": "¿Qué tan probable es que sigas trabajando en Banconal dentro de 12 meses?",
+    "descripcion": "",
+    "tipo": "escala",
+    "obligatoria": true,
+    "opciones": [],
+    "maxOpciones": 0,
+    "escala": {
+      "min": 0,
+      "max": 10,
+      "etiquetaMin": "Nada probable",
+      "etiquetaMax": "Muy probable"
+    },
+    "textoLargo": true,
+    "maxCaracteres": 500,
+    "condicion": null,
+    "opcionesSegun": null
+  },
+  {
+    "id": "ancla_3",
+    "texto": "¿Qué tan probable es que busques activamente trabajo fuera de Banconal en los próximos 6 meses?",
+    "descripcion": "",
+    "tipo": "escala",
+    "obligatoria": true,
+    "opciones": [],
+    "maxOpciones": 0,
+    "escala": {
+      "min": 0,
+      "max": 10,
+      "etiquetaMin": "Nada probable",
+      "etiquetaMax": "Muy probable"
+    },
+    "textoLargo": true,
+    "maxCaracteres": 500,
+    "condicion": null,
+    "opcionesSegun": null
+  },
+  {
+    "id": "ancla_4",
+    "texto": "Me siento comprometido/a a dar un esfuerzo extra para que Banconal tenga éxito.",
+    "descripcion": "",
+    "tipo": "escala",
+    "obligatoria": true,
+    "opciones": [],
+    "maxOpciones": 0,
+    "escala": {
+      "min": 0,
+      "max": 10,
+      "etiquetaMin": "Totalmente en desacuerdo",
+      "etiquetaMax": "Totalmente de acuerdo"
+    },
+    "textoLargo": true,
+    "maxCaracteres": 500,
+    "condicion": null,
+    "opcionesSegun": null
+  },
+  {
+    "id": "ancla_5",
+    "texto": "Siento que mi trabajo tiene sentido y aporta valor.",
+    "descripcion": "",
+    "tipo": "escala",
+    "obligatoria": true,
+    "opciones": [],
+    "maxOpciones": 0,
+    "escala": {
+      "min": 0,
+      "max": 10,
+      "etiquetaMin": "Totalmente en desacuerdo",
+      "etiquetaMax": "Totalmente de acuerdo"
+    },
+    "textoLargo": true,
+    "maxCaracteres": 500,
+    "condicion": null,
+    "opcionesSegun": null
   }
 ]
 $json$::jsonb,
@@ -2321,12 +2441,31 @@ $json$::jsonb,
  where trim(titulo) = 'Encuesta EXCO - 2026';
 
 -- ---------------------------------------------------------------------
--- 4) Comprobación. "bloques" debe decir 50 (2 descripciones + 6 demográficas
---    + 42 preguntas). Si devuelve 0 filas, el título no coincide: mira el
+-- 3b) Bienvenida: nombre completo del Banco y conteo de afirmaciones.
+--     Solo cambia esas dos frases; el resto del texto queda igual.
+-- ---------------------------------------------------------------------
+update public.encuestas
+   set bienvenida = jsonb_set(
+         bienvenida, '{texto}',
+         to_jsonb(
+           replace(
+             regexp_replace(bienvenida->>'texto',
+                            'Banco Nacional(?! de Panamá)', 'Banco Nacional de Panamá', 'g'),
+             'cada una de las 42 afirmaciones',
+             'cada una de las 42 afirmaciones y las 5 preguntas generales del final')
+         )),
+       actualizado_en = now()
+ where trim(titulo) = 'Encuesta EXCO - 2026';
+
+-- ---------------------------------------------------------------------
+-- 4) Comprobación. "bloques" debe decir 56 (3 descripciones + 6 demográficas
+--    + 42 preguntas + 5 anclas) y "de_escala" 47. La portada mostrará
+--    "53 preguntas". Si devuelve 0 filas, el título no coincide: mira el
 --    resultado del paso 1 y ajusta el texto entre comillas en los pasos 2 y 3.
 -- ---------------------------------------------------------------------
 select titulo,
        estado,
+       bienvenida->>'texto' as bienvenida,
        jsonb_array_length(preguntas) as bloques,
        (select count(*) from jsonb_array_elements(preguntas) p
          where p->>'tipo' = 'escala')                        as de_escala,
