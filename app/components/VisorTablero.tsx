@@ -226,7 +226,13 @@ function PantallaCarga({
     <div
       role="status"
       aria-live="polite"
-      className={`carga-fondo absolute inset-0 z-10 flex flex-col items-center justify-center overflow-hidden transition-opacity duration-500 ${
+      /*
+       * Una sola columna, sin nada absoluto: arriba el cliente y el nombre del
+       * tablero, abajo la carita y la barra. Antes el bloque de abajo estaba
+       * anclado con position y en pantallas bajas —un portátil apaisado, un
+       * celular acostado— se montaba encima del título.
+       */
+      className={`carga-fondo absolute inset-0 z-10 flex flex-col items-center justify-between gap-6 overflow-hidden px-6 pb-10 pt-8 transition-opacity duration-500 ${
         desvanecer ? "opacity-0" : "opacity-100"
       }`}
     >
@@ -245,23 +251,28 @@ function PantallaCarga({
         />
       ))}
 
-      <div className="relative flex flex-col items-center gap-5 px-6 text-center">
+      {/*
+        Este bloque se queda con todo el espacio que sobre y centra lo suyo
+        dentro. El logo se mide también en alto de pantalla, para que en una
+        ventana baja encoja en vez de empujar al resto.
+      */}
+      <div className="relative flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-4 text-center sm:gap-5">
         {clienteLogo && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={clienteLogo}
             alt={clienteNombre ?? ""}
-            className="h-28 w-auto max-w-[380px] rounded-2xl bg-white/95 object-contain p-5 shadow-xl sm:h-32"
+            className="h-28 max-h-[26vh] w-auto max-w-[min(380px,72vw)] rounded-2xl bg-white/95 object-contain p-4 shadow-xl sm:h-32 sm:p-5"
           />
         )}
-        <h2 className="max-w-xl text-2xl font-semibold leading-snug text-white sm:text-3xl">
+        <h2 className="max-w-xl text-xl font-semibold leading-snug text-white sm:text-2xl md:text-3xl">
           {titulo}
         </h2>
       </div>
 
-      <div className="absolute bottom-12 flex w-full max-w-xs flex-col items-center gap-4 px-6">
+      <div className="relative flex w-full max-w-xs shrink-0 flex-col items-center gap-3 sm:gap-4">
         {/* El isotipo gira hasta quedar como carita, guiña y vuelve. */}
-        <IsotipoPlurum className="carga-carita h-12 w-auto" animada />
+        <IsotipoPlurum className="carga-carita h-10 w-auto sm:h-12" animada />
         <p className="text-sm font-medium text-white/90">Cargando el tablero…</p>
         <span
           aria-hidden
