@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { createHash } from "node:crypto";
+import poblacionExco from "@/lib/poblaciones/seguimiento-exco-banconal.json";
 
 /**
  * Seguimiento EN VIVO de encuestas montadas en Typeform.
@@ -18,10 +20,20 @@ import { NextResponse } from "next/server";
  * Solo salen las respuestas COMPLETAS y solo las preguntas declaradas en
  * `campos` (los datos de segmentación). Nunca salen campos ocultos (correo,
  * número de colaborador, nombre) ni las respuestas de la encuesta.
+ *
+ * Cruce con la base: si la encuesta se respondió con el link personalizado,
+ * las preguntas demográficas se saltan y vienen vacías. En ese caso se toma
+ * el correo o el número de colaborador de los campos ocultos, se busca (como
+ * hash) en el mapa de población que genera `generar_dashboard.py` y se
+ * devuelve la subgerencia / gerencia / región / lugar de la BASE. El correo
+ * nunca sale del servidor.
  */
 
+/** Mapa de población: hash(correo|número) -> índices en `tablas`. */
+type Poblacion = { tablas: Record<"s" | "g" | "r" | "l", string[]>; p: Record<string, number[]> };
+
 type Campo = { nombre: string; ref: string; prefijo?: boolean };
-type Config = { formId: string; desde: string; campos: Campo[] };
+type Config = { formId: string; desde: string; campos: Campo[]; poblacion?: Poblacion; sal?: string };
 
 /** Un tablero por encuesta. La llave es el slug del tablero en Datta. */
 const TABLEROS: Record<string, Config> = {
@@ -35,6 +47,9 @@ const TABLEROS: Record<string, Config> = {
       { nombre: "region", ref: "region" },
       { nombre: "lugar", ref: "lugar_", prefijo: true },
     ],
+    poblacion: poblacionExco as Poblacion,
+    // Debe ser igual a SAL en generar_dashboard.py
+    sal: "plurum-exco-banconal-2026",
   },
 };
 
@@ -71,6 +86,28 @@ function idOculto(r: Respuesta): string | null {
   for (const k of Object.keys(h)) {
     if (/colab|codigo|numero|^id$|correo|email|mail/i.test(k) && h[k]) {
       return `${k}:${String(h[k]).trim().toLowerCase()}`;
+    }
+  }
+  return null;
+}
+
+/** Busca a la persona en la base por los campos ocultos del link personalizado. */
+function segmentoDeBase(r: Respuesta, cfg: Config): string[] | null {
+  const pob = cfg.poblacion;
+  if (!pob || !cfg.sal) return null;
+  const hsh = (k: string) => createHash("sha256").update(`${cfg.sal}:${k}`).digest("hex").slice(0, 16);
+  for (const valor of Object.values(r.hidden ?? {})) {
+    const v = String(valor ?? "").trim().toLowerCase();
+    if (!v) continue;
+    const llaves: string[] = [];
+    if (v.includes("@")) llaves.push(`c:${v}`);
+    const digitos = v.replace(/\D/g, "");
+    if (digitos && digitos.length >= 3 && !v.includes("@")) llaves.push(`n:${String(Number(digitos))}`);
+    for (const k of llaves) {
+      const seg = pob.p[hsh(k)];
+      if (seg) {
+        return [pob.tablas.s[seg[0]], pob.tablas.g[seg[1]], pob.tablas.r[seg[2]], pob.tablas.l[seg[3]]];
+      }
     }
   }
   return null;
@@ -146,6 +183,10 @@ export async function GET(
     // veces con el mismo link, se queda su última respuesta.
     const vistos = new Set<string>();
     let duplicadas = 0;
+    let cruzadas = 0;
+    let porEncuesta = 0;
+    let sinDatos = 0;
+    const ocultos = new Set<string>();
     const filas: string[][] = [];
     for (const r of respuestas) {
       if (!r.submitted_at) continue;
@@ -157,7 +198,13 @@ export async function GET(
         }
         vistos.add(id);
       }
-      filas.push([r.submitted_at, ...cfg.campos.map((c) => valorDe(r, c))]);
+      const deBase = segmentoDeBase(r, cfg);
+      const declarados = cfg.campos.map((c) => valorDe(r, c));
+      if (deBase) cruzadas++;
+      else if (declarados.some(Boolean)) porEncuesta++;
+      else sinDatos++;
+      if (r.hidden) Object.keys(r.hidden).forEach((k) => ocultos.add(k));
+      filas.push([r.submitted_at, ...(deBase ?? declarados)]);
     }
 
     const cuerpo = {
@@ -165,6 +212,8 @@ export async function GET(
       desde: cfg.desde,
       total: filas.length,
       duplicadas,
+      // Diagnóstico del cruce: solo conteos y NOMBRES de los campos ocultos.
+      cruce: { conBase: cruzadas, porEncuesta, sinDatos, camposOcultos: [...ocultos] },
       campos: ["fecha", ...cfg.campos.map((c) => c.nombre)],
       filas,
     };
