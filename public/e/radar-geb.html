@@ -140,6 +140,9 @@ ul.tips li::before{content:"";flex:none;width:9px;height:9px;border-radius:3px;b
 const SUPABASE_URL      = "https://griozhufchnxpdpxmspd.supabase.co";   // ej: https://xxxxxxxx.supabase.co
 const SUPABASE_ANON_KEY = "sb_publishable_2M-S4-vlgk_3pR90lmc6Zg_GOkKwMnc";   // llave anon (o publishable) del proyecto
 
+/* Pon ABIERTA en true para volver a recibir respuestas. */
+const ABIERTA = false;
+
 const FILIALES = ["TGI","Enlaza","Corporativa"];
 const GENEROS  = ["Masculino","Femenino","Otro"];
 const LETRA_ESTADO = {A:"Prisa", B:"Frustración", C:"Complacencia", D:"Fatiga", E:"Complacencia"};
@@ -253,6 +256,28 @@ let filial=null, genero=null, resp=new Array(PREGUNTAS.length).fill(null), i=-1,
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const avance=p=>BARRA.style.width=Math.max(0,Math.min(100,p))+"%";
 
+function cerrada(){
+  PASO.textContent="Medición cerrada"; avance(100);
+  T.className="card oro";
+  T.innerHTML=`<div class="res-top">
+      <div class="et">El Radar de mis Estados</div>
+      <h2>La medición ya cerró</h2>
+      <p>Gracias a quienes participaron en la jornada.</p>
+    </div>
+    <div class="in">
+      <p class="sub" style="margin-top:0">Esta encuesta estuvo abierta durante la feria de Acuerdos de Vida y
+      hoy ya no recibe respuestas. Si llegaste aquí por un código QR que quedó publicado, no tienes que hacer nada.</p>
+      <div class="nota-indep">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <div><b>¿Tienes dudas?</b> Escríbele al equipo de Cultura GEB.</div>
+      </div>
+    </div>
+    <div class="cierre">
+      <b><svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z" fill="#091539"><animateTransform attributeName="transform" type="scale" values="1;1.08;1" dur="1.2s" additive="sum" repeatCount="indefinite"/></path></svg>Primero la Vida</b>
+      <span>Mente en calma, acción segura</span>
+    </div>`;
+}
+
 function portada(){
   PASO.textContent="Antes de empezar";avance(0);
   T.className="card";
@@ -363,7 +388,7 @@ async function enviar(estado){
   }
 }
 
-portada();
+ABIERTA ? portada() : cerrada();
 </script>
 </body>
 </html>
