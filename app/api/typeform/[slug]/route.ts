@@ -32,7 +32,12 @@ import poblacionExco from "@/lib/poblaciones/seguimiento-exco-banconal.json";
 /** Mapa de población: hash(correo|número) -> índices en `tablas`. */
 type Poblacion = { tablas: Record<"s" | "g" | "r" | "l", string[]>; p: Record<string, number[]> };
 
-type Campo = { nombre: string; ref: string; prefijo?: boolean };
+/**
+ * `ref`: referencia de la pregunta en Typeform. Si la encuesta se armó a mano
+ * en Typeform (refs aleatorias), se usa `titulo`: la ruta lee la definición del
+ * formulario y toma la primera pregunta cuyo enunciado coincida.
+ */
+type Campo = { nombre: string; ref: string; prefijo?: boolean; titulo?: RegExp };
 type Config = { formId: string; desde: string; campos: Campo[]; poblacion?: Poblacion; sal?: string };
 
 /** Un tablero por encuesta. La llave es el slug del tablero en Datta. */
@@ -51,7 +56,55 @@ const TABLEROS: Record<string, Config> = {
     // Debe ser igual a SAL en generar_dashboard.py
     sal: "plurum-exco-banconal-2026",
   },
+  "seguimiento-clima-magnex": {
+    // Encuesta de Clima 2026 - Magnex, fase 1 (Perú). Link general / QR: sin cruce por correo.
+    formId: "PENDIENTE",
+    // Salida en vivo: 13-oct-2026, 00:00 hora de Lima (UTC-5).
+    desde: "2026-10-13T05:00:00Z",
+    campos: [
+      { nombre: "contrato", ref: "contrato", titulo: /contrato|proyecto|operaci[oó]n/i },
+      { nombre: "ciudad", ref: "ciudad", titulo: /ciudad|sede|lugar de trabajo|ubicaci[oó]n/i },
+    ],
+  },
 };
+
+/** Refs de las preguntas buscadas por enunciado (se refresca cada 10 min). */
+const REFS_MS = 600_000;
+const refsCache = new Map<string, { t: number; refs: Record<string, string> }>();
+
+type CampoForm = { ref: string; title?: string; properties?: { fields?: CampoForm[] } };
+
+async function resolverRefs(cfg: Config, token: string): Promise<Record<string, string>> {
+  const refs: Record<string, string> = {};
+  const porTitulo = cfg.campos.filter((c) => c.titulo);
+  if (!porTitulo.length) return refs;
+  const enCache = refsCache.get(cfg.formId);
+  if (enCache && Date.now() - enCache.t < REFS_MS) return enCache.refs;
+  const r = await fetch(`https://api.typeform.com/forms/${cfg.formId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!r.ok) throw new Error(`Typeform respondió ${r.status} al leer el formulario`);
+  const form = (await r.json()) as { fields?: CampoForm[] };
+  const planos: CampoForm[] = [];
+  const recorrer = (fs?: CampoForm[]) =>
+    (fs ?? []).forEach((f) => {
+      planos.push(f);
+      recorrer(f.properties?.fields);
+    });
+  recorrer(form.fields);
+  const limpio = (t?: string) => (t ?? "").replace(/<[^>]*>|[*_{}]/g, " ").replace(/\s+/g, " ");
+  const usados = new Set<string>();
+  for (const c of porTitulo) {
+    const f = planos.find((x) => !usados.has(x.ref) && c.titulo!.test(limpio(x.title)));
+    if (f) {
+      refs[c.nombre] = f.ref;
+      usados.add(f.ref);
+    }
+  }
+  refsCache.set(cfg.formId, { t: Date.now(), refs });
+  return refs;
+}
 
 /** Caché en memoria para no golpear a Typeform en cada recarga. */
 const CACHE_MS = 60_000;
@@ -69,9 +122,10 @@ type Respuesta = {
   }[];
 };
 
-function valorDe(r: Respuesta, campo: Campo): string {
+function valorDe(r: Respuesta, campo: Campo, refs: Record<string, string> = {}): string {
+  const ref = refs[campo.nombre] ?? campo.ref;
   const a = (r.answers ?? []).find((x) =>
-    campo.prefijo ? x.field.ref.startsWith(campo.ref) : x.field.ref === campo.ref,
+    campo.prefijo ? x.field.ref.startsWith(ref) : x.field.ref === ref,
   );
   if (!a) return "";
   return a.choice?.label ?? a.choice?.other ?? a.text ?? "";
@@ -176,7 +230,16 @@ export async function GET(
     );
   }
 
+  if (!cfg.formId || cfg.formId === "PENDIENTE") {
+    return NextResponse.json(
+      { error: "Falta configurar el ID del formulario de Typeform en Datta (app/api/typeform/[slug]/route.ts)" },
+      { status: 503 },
+    );
+  }
+
   try {
+    const refs = await resolverRefs(cfg, token);
+    const faltan = cfg.campos.filter((c) => c.titulo && !refs[c.nombre]).map((c) => c.nombre);
     const respuestas = await traerRespuestas(cfg, token);
 
     // Más reciente primero (así viene de Typeform): si alguien respondió dos
@@ -199,7 +262,7 @@ export async function GET(
         vistos.add(id);
       }
       const deBase = segmentoDeBase(r, cfg);
-      const declarados = cfg.campos.map((c) => valorDe(r, c));
+      const declarados = cfg.campos.map((c) => valorDe(r, c, refs));
       if (deBase) cruzadas++;
       else if (declarados.some(Boolean)) porEncuesta++;
       else sinDatos++;
@@ -215,6 +278,7 @@ export async function GET(
       // Diagnóstico del cruce: solo conteos y NOMBRES de los campos ocultos.
       cruce: { conBase: cruzadas, porEncuesta, sinDatos, camposOcultos: [...ocultos] },
       campos: ["fecha", ...cfg.campos.map((c) => c.nombre)],
+      faltan,
       filas,
     };
     cache.set(slug, { t: Date.now(), cuerpo });
