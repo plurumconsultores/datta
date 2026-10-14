@@ -58,7 +58,7 @@ const TABLEROS: Record<string, Config> = {
   },
   "seguimiento-clima-magnex": {
     // Encuesta de Clima 2026 - Magnex, fase 1 (Perú). Link general / QR: sin cruce por correo.
-    formId: "PENDIENTE",
+    formId: "JxIkX0zr",
     // Salida en vivo: 13-oct-2026, 00:00 hora de Lima (UTC-5).
     desde: "2026-10-13T05:00:00Z",
     campos: [
