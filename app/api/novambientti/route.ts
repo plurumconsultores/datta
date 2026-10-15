@@ -27,7 +27,7 @@ async function sesion() {
   if (!user) return { supabase, user: null, esAdmin: false, esEquipo: false };
   const [{ data: esAdmin }, { data: esEquipo }] = await Promise.all([
     supabase.rpc('es_admin'),
-    supabase.rpc('es_equipo'),     // admin o analista: el equipo que facilita
+    supabase.rpc('es_equipo'),     // admin o analista: el equipo que facilita (si aún no existe, responde error y queda en false)
   ]);
   return { supabase, user, esAdmin: esAdmin === true, esEquipo: esEquipo === true || esAdmin === true };
 }
@@ -50,11 +50,13 @@ export async function GET() {
     supabase.from('novambientti_sesiones').select('id, nombre, inicio, fin, fase').order('inicio', { ascending: true }),
   ]);
   if (aportes.error) return json({ error: aportes.error.message }, 500);
-  if (grupos.error) return json({ error: grupos.error.message }, 500);
 
-  const sesiones = grupos.data ?? [];
+  // Si todavía no se ha corrido el SQL de grupos, el tablero sigue funcionando y avisa al equipo
+  const avisos: string[] = [];
+  if (grupos.error) avisos.push('Falta correr el SQL actualizado en Supabase (tabla de grupos): ' + grupos.error.message);
+  const sesiones = grupos.error ? [] : (grupos.data ?? []);
   const actual = [...sesiones].reverse().find((g) => !g.fin) ?? null;
-  return json({ respuestas: aportes.data ?? [], sesiones, actual, esAdmin, esEquipo });
+  return json({ respuestas: aportes.data ?? [], sesiones, actual, esAdmin, esEquipo, avisos, version: '15-oct-B' });
 }
 
 export async function POST(req: Request) {
