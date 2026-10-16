@@ -4,14 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Laboratorio de Comportamientos · Novambientti</title>
+<title>Mis compromisos con nuestros valores · Novambientti</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --verde-osc:#0D4037; --verde:#15594C; --crema:#FAEADB; --fondo:#FFFBF6; --tinta:#1F2A27; --tinta2:#4A4F4D; --tenue:#8A8E8C; --linea:#EADFD3;
-  --c:#15594C; --osc:#0D4037; --claro:#E6F1EC;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--fondo)}
@@ -20,33 +19,46 @@ body{font-family:"Source Sans 3",system-ui,sans-serif;color:var(--tinta);min-hei
 header{position:relative;z-index:1;background:var(--verde-osc);padding:14px 16px;display:flex;justify-content:center}
 header .logo{line-height:0}
 header .logo img{height:28px;width:auto}
-main{position:relative;z-index:1;flex:1;width:100%;max-width:560px;margin:0 auto;padding:22px 16px 32px;display:flex;flex-direction:column;gap:16px}
-.card{background:#fff;border:1px solid var(--linea);border-radius:18px;padding:20px 18px;box-shadow:0 2px 10px rgba(13,64,55,.06)}
+main{position:relative;z-index:1;flex:1;width:100%;max-width:560px;margin:0 auto;padding:22px 16px 20px;display:flex;flex-direction:column;gap:16px}
+#form{display:flex;flex-direction:column;gap:14px}
+#valores{display:flex;flex-direction:column;gap:14px}
+.card{background:#fff;border:1px solid var(--linea);border-radius:18px;padding:18px 16px;box-shadow:0 2px 10px rgba(13,64,55,.06)}
 .marca{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--tenue);text-align:center}
 h1{font-family:Sora,sans-serif;font-size:22px;color:var(--verde-osc);text-align:center;margin-top:4px}
-.fase{border-top:6px solid var(--c)}
-.chip{display:inline-block;background:var(--claro);color:var(--osc);font-weight:700;font-size:14px;border-radius:999px;padding:4px 12px}
-.fase h2{font-family:Sora,sans-serif;font-size:30px;color:var(--osc);margin-top:10px;line-height:1.1}
-.pregunta{font-size:19px;line-height:1.35;margin-top:10px;font-weight:600}
-.ayuda{font-size:15px;color:var(--tinta2);margin-top:8px;line-height:1.4}
-label{display:block;font-weight:700;font-size:15px;margin:18px 0 6px}
-textarea{width:100%;min-height:130px;font:inherit;font-size:17px;color:var(--tinta);border:1.5px solid #DCCFC0;border-radius:12px;padding:12px;resize:vertical;background:#FFFDFB}
+.intro{border-top:6px solid var(--verde)}
+.intro h2{font-family:Sora,sans-serif;font-size:22px;color:var(--verde-osc);line-height:1.2}
+.intro p{font-size:16.5px;line-height:1.45;color:var(--tinta2);margin-top:8px}
+.anonimo{font-size:14px!important;color:var(--tenue)!important}
+.valor{border-top:6px solid var(--c);transition:box-shadow .3s}
+.valor.falta{box-shadow:0 0 0 2px #B3261E}
+.v-cab{display:flex;align-items:center;gap:10px}
+.v-num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-family:Sora,sans-serif;font-weight:700;font-size:16px}
+.v-cab h3{flex:1;font-family:Sora,sans-serif;font-size:20px;color:var(--osc);line-height:1.2}
+.v-ok{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;color:#fff;background:var(--c);opacity:0;transform:scale(.6);transition:opacity .3s,transform .3s}
+.valor.ok .v-ok{opacity:1;transform:scale(1)}
+label{display:block;font-weight:700;font-size:15px;margin:12px 0 6px;color:var(--tinta2)}
+textarea{width:100%;min-height:92px;font:inherit;font-size:17px;color:var(--tinta);border:1.5px solid #DCCFC0;border-radius:12px;padding:11px 12px;resize:vertical;background:#FFFDFB}
 textarea:focus{outline:none;border-color:var(--c);box-shadow:0 0 0 3px var(--claro)}
-.contador{font-size:13px;color:var(--tenue);text-align:right;margin-top:4px}
-button.enviar{all:unset;box-sizing:border-box;display:block;width:100%;text-align:center;margin-top:14px;padding:15px;border-radius:14px;background:var(--osc);color:#fff;font-weight:700;font-size:17px;cursor:pointer;transition:opacity .2s}
-button.enviar[disabled]{opacity:.45;cursor:not-allowed}
-button.enviar:focus-visible{outline:3px solid var(--c);outline-offset:3px}
-.anonimo{font-size:13.5px;color:var(--tenue);text-align:center;margin-top:12px}
-.error{display:none;margin-top:12px;background:#FDECEA;color:#8A2416;border-radius:10px;padding:10px 12px;font-size:15px}
+.v-pie{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:13px}
+.v-falta{color:#B3261E;font-weight:700;visibility:hidden}
+.valor.falta .v-falta{visibility:visible}
+.contador{color:var(--tenue)}
+.barra-envio{position:sticky;bottom:0;z-index:3;width:100%;max-width:560px;margin:0 auto;padding:10px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(255,251,246,.96);border-top:1px solid var(--linea);backdrop-filter:blur(6px)}
+.progreso{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--tinta2);margin-bottom:8px}
+.progreso span{white-space:nowrap}
+.pbar{flex:1;height:8px;border-radius:999px;background:#EFE6DB;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:var(--verde);border-radius:999px;transition:width .4s ease}
+button.enviar{all:unset;box-sizing:border-box;display:block;width:100%;text-align:center;padding:14px;border-radius:14px;background:#8FA8A0;color:#fff;font-weight:700;font-size:17px;cursor:pointer;transition:background .3s}
+button.enviar.completo{background:var(--verde-osc)}
+button.enviar[disabled]{opacity:.6;cursor:wait}
+button.enviar:focus-visible{outline:3px solid var(--verde);outline-offset:3px}
+.error{display:none;margin-top:8px;background:#FDECEA;color:#8A2416;border-radius:10px;padding:9px 12px;font-size:15px}
 .gracias{text-align:center}
 .gracias .icono{width:64px;height:64px;margin:0 auto 10px}
-.gracias h2{font-family:Sora,sans-serif;font-size:24px;color:var(--osc)}
+.gracias h2{font-family:Sora,sans-serif;font-size:24px;color:var(--verde-osc)}
 .gracias p{font-size:16px;color:var(--tinta2);margin-top:8px;line-height:1.4}
-button.otro{all:unset;cursor:pointer;display:inline-block;margin-top:16px;padding:11px 18px;border-radius:999px;border:1.5px solid var(--c);color:var(--osc);font-weight:700}
-.elegir{display:flex;flex-direction:column;gap:10px;margin-top:14px}
-.elegir a{display:block;text-decoration:none;border-radius:14px;padding:14px 16px;border:1.5px solid var(--c);color:var(--osc);font-weight:700;font-size:18px;background:var(--claro)}
-.elegir a span{display:block;font-weight:600;font-size:14px;color:var(--tinta2)}
-footer{position:relative;z-index:1;text-align:center;font-size:12.5px;color:var(--tenue);padding:0 16px 18px}
+button.otro{all:unset;cursor:pointer;display:inline-block;margin-top:18px;padding:10px 16px;border-radius:999px;border:1.5px solid var(--linea);color:var(--tinta2);font-weight:600;font-size:14px}
+footer{position:relative;z-index:1;text-align:center;font-size:12.5px;color:var(--tenue);padding:10px 16px 18px}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -60,24 +72,20 @@ footer{position:relative;z-index:1;text-align:center;font-size:12.5px;color:var(
     <h1>Laboratorio de Comportamientos</h1>
   </div>
 
-  <!-- Formulario de la fase -->
-  <section class="card fase" id="form" hidden>
-    <span class="chip" id="chip"></span>
-    <h2 id="titulo"></h2>
-    <p class="pregunta" id="pregunta"></p>
-    <p class="ayuda" id="ayuda"></p>
-    <label for="texto">Tu aporte</label>
-    <textarea id="texto" maxlength="400" placeholder=""></textarea>
-    <div class="contador"><span id="cuenta">0</span> / 400</div>
-    <button class="enviar" id="enviar" disabled>Enviar mi aporte</button>
-    <div class="error" id="error" role="alert"></div>
-    <p class="anonimo">Tu aporte es anónimo: no pedimos nombre, correo ni ningún otro dato.</p>
-  </section>
+  <!-- Encuesta -->
+  <div id="form">
+    <section class="card intro">
+      <h2>Mis compromisos con nuestros valores</h2>
+      <p>Escribe un compromiso concreto para cada uno de nuestros <b>8 valores</b>: algo que vas a hacer y que los demás puedan ver.</p>
+      <p class="anonimo">Es anónimo: no pedimos nombre, correo ni ningún otro dato.</p>
+    </section>
+    <div id="valores"></div>
+  </div>
 
   <!-- Gracias -->
   <section class="card gracias" id="gracias" hidden>
     <svg class="icono" viewBox="0 0 64 64" aria-hidden="true">
-      <circle cx="32" cy="32" r="30" fill="var(--claro)"/>
+      <circle cx="32" cy="32" r="30" fill="#E6F1EC"/>
       <path d="M32 50 L32 30" stroke="#8A7A68" stroke-width="4" stroke-linecap="round"/>
       <g fill="#B2C3AC" stroke="#93A68F" stroke-width=".6">
         <path d="M32 30 Q22 22 16 26 Q24 30 32 30Z"/><path d="M32 30 Q42 22 48 26 Q40 30 32 30Z"/>
@@ -85,111 +93,117 @@ footer{position:relative;z-index:1;text-align:center;font-size:12.5px;color:var(
       </g>
       <circle cx="32" cy="14" r="4" fill="#F2C230"/>
     </svg>
-    <h2>¡Gracias por tu aporte!</h2>
-    <p id="graciasTxt">Ya está en el tablero del páramo.</p>
-    <button class="otro" id="otro">Enviar otro aporte</button>
+    <h2>¡Gracias por tus compromisos!</h2>
+    <p>Tus 8 compromisos ya están haciendo crecer el páramo.</p>
+    <button class="otro" id="otro">Registrar los compromisos de otra persona</button>
   </section>
 
-  <!-- Fase cerrada -->
+  <!-- Encuesta cerrada -->
   <section class="card gracias" id="cerrada" hidden>
-    <h2>Esta fase ya cerró</h2>
-    <p>Gracias por participar. Atento a las indicaciones del equipo facilitador para la siguiente fase.</p>
-  </section>
-
-  <!-- Sin fase en la dirección: elegir -->
-  <section class="card" id="elegir" hidden>
-    <p class="pregunta" style="text-align:center">¿A qué momento de la actividad quieres aportar?</p>
-    <div class="elegir" id="opciones"></div>
+    <h2>La encuesta ya cerró</h2>
+    <p>Gracias por participar.</p>
   </section>
 </main>
+
+<div class="barra-envio" id="barra">
+  <div class="progreso"><span id="prog">0 de 8 compromisos</span><div class="pbar"><i id="pbar"></i></div></div>
+  <button class="enviar" id="enviar">Enviar mis 8 compromisos</button>
+  <div class="error" id="error" role="alert"></div>
+</div>
 <footer>Plurum · Laboratorio de Comportamientos</footer>
 
 <script>
 /* ============================================================
    CONFIGURACIÓN
    ============================================================ */
-// Pegar aquí la URL del proyecto de Supabase de Datta y la llave publishable (la misma de la encuesta de GEB)
 const SUPABASE_URL = 'https://griozhufchnxpdpxmspd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2M-S4-vlgk_3pR90lmc6Zg_GOkKwMnc';
-const TABLA = 'respuestas_novambientti';
-// Abrir o cerrar cada fase sin tocar nada más (true = recibe aportes)
-const ABIERTAS = { stop: true, start: true, cont: true };
+const TABLA = 'novambientti_compromisos_valores';
+const ABIERTA = true;          // false = la encuesta deja de recibir compromisos
+const MIN = 5;                 // caracteres mínimos por compromiso
 
-const FASES = {
-  stop:  { nombre:'Stop',     sub:'Dejar de hacer',     c:'#CC3E2A', osc:'#9E2C1C', claro:'#FBE3DE',
-           pregunta:'¿Qué hábitos nos están desgastando frente a los cambios?',
-           ayuda:'Escribe un hábito concreto que como equipo deberíamos dejar de hacer.',
-           ejemplo:'Ejemplo: asumir cosas en lugar de preguntar.',
-           gracias:'Tu aporte ya está abonando el páramo.' },
-  start: { nombre:'Start',    sub:'Empezar a hacer',    c:'#EE8A3C', osc:'#A65613', claro:'#FDEBDC',
-           pregunta:'¿Qué nuevos comportamientos necesitamos para ser ágiles y cuidarnos?',
-           ayuda:'Escribe un comportamiento nuevo, observable, que deberíamos empezar a hacer.',
-           ejemplo:'Ejemplo: hacer validaciones de 5 minutos antes de enviar un reporte.',
-           gracias:'Con tu aporte acaba de brotar un frailejón.' },
-  cont:  { nombre:'Continue', sub:'Continuar haciendo', c:'#178A62', osc:'#0D4037', claro:'#DDF0E8',
-           pregunta:'¿Cuál es el oro que nos hace fuertes y no podemos perder?',
-           ayuda:'Escribe algo que ya hacemos bien y que debemos cuidar.',
-           ejemplo:'Ejemplo: la disposición para ayudarnos ante una emergencia.',
-           gracias:'Tu aporte hace crecer y florecer el páramo.' }
-};
+const VALORES = [
+  {id:1, nombre:'Comunicación asertiva', c:'#CC3E2A', osc:'#9E2C1C', claro:'#FBE3DE', ej:'Ej.: decir a tiempo cuando la carga de trabajo no me da.'},
+  {id:2, nombre:'Aprendizaje',           c:'#EE8A3C', osc:'#A65613', claro:'#FDEBDC', ej:'Ej.: compartir cada mes algo nuevo que aprendí en campo.'},
+  {id:3, nombre:'Comunidad',             c:'#178A62', osc:'#0D5A40', claro:'#DDF0E8', ej:'Ej.: integrar a las personas nuevas desde el primer día.'},
+  {id:4, nombre:'Cocreación',            c:'#2C7DA0', osc:'#1B5670', claro:'#DDEEF5', ej:'Ej.: invitar a otras áreas a construir las propuestas.'},
+  {id:5, nombre:'Adaptabilidad',         c:'#7B5EA7', osc:'#54397D', claro:'#ECE5F5', ej:'Ej.: recibir los cambios con apertura y proponer cómo hacerlos.'},
+  {id:6, nombre:'Pasión / Calidad',      c:'#C2457A', osc:'#8A2552', claro:'#F8E1EB', ej:'Ej.: hacer validaciones de 5 minutos antes de enviar un informe.'},
+  {id:7, nombre:'Disposición',           c:'#B8901A', osc:'#7A5E0C', claro:'#F6EDD0', ej:'Ej.: ofrecer ayuda antes de que me la pidan.'},
+  {id:8, nombre:'Compromiso',            c:'#15594C', osc:'#0D4037', claro:'#DCEBE6', ej:'Ej.: avisar con tiempo si no puedo cumplir.'}
+];
 
 /* ============================================================ */
 const $ = s => document.querySelector(s);
-const PRUEBA = SUPABASE_URL.startsWith('PEGAR');   // sin llaves: la página funciona en modo de prueba y no guarda nada
+const PRUEBA = SUPABASE_URL.startsWith('PEGAR');   // sin llaves: modo de prueba, no guarda nada
+const BORRADOR = 'novambientti-compromisos-borrador';
 
-// textura de líneas orgánicas de la marca
-(function(){
+(function(){   // textura de líneas orgánicas de la marca
   const svg=$('#textura'), NS='http://www.w3.org/2000/svg', w=800, h=1400; svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
   for(let i=0;i<30;i++){ let d=''; const y0=i*(h/29); for(let x=0;x<=w;x+=20){ const y=y0+Math.sin(x*.006+i*.3)*30+Math.sin(x*.013-i*.2)*12; d+=(x?'L':'M')+x+' '+y.toFixed(1); }
     const p=document.createElementNS(NS,'path'); p.setAttribute('d',d); p.setAttribute('fill','none'); p.setAttribute('stroke','#E9CDB4'); p.setAttribute('stroke-width','1.2'); p.setAttribute('opacity','.4'); svg.appendChild(p); }
 })();
 
-const param = new URLSearchParams(location.search).get('fase');
-const clave = param && (param.toLowerCase().startsWith('cont') ? 'cont' : param.toLowerCase());
-const F = FASES[clave];
+$('#valores').innerHTML = VALORES.map(v=>`
+  <section class="card valor" id="v${v.id}" style="--c:${v.c};--osc:${v.osc};--claro:${v.claro}">
+    <div class="v-cab"><span class="v-num">${v.id}</span><h3>${v.nombre}</h3><span class="v-ok" aria-hidden="true">✓</span></div>
+    <label for="t${v.id}">Me comprometo a…</label>
+    <textarea id="t${v.id}" maxlength="300" placeholder="${v.ej}"></textarea>
+    <div class="v-pie"><span class="v-falta">Falta este compromiso</span><span class="contador"><span>0</span> / 300</span></div>
+  </section>`).join('');
 
-function aplicarColores(f){ const r=document.documentElement.style; r.setProperty('--c',f.c); r.setProperty('--osc',f.osc); r.setProperty('--claro',f.claro); }
-
-if(!F){
-  $('#elegir').hidden = false;
-  $('#opciones').innerHTML = Object.entries(FASES).map(([k,f])=>`<a href="?fase=${k}" style="--c:${f.c};--osc:${f.osc};--claro:${f.claro}">${f.nombre}<span>${f.sub}</span></a>`).join('');
-} else if(!ABIERTAS[clave]){
-  aplicarColores(F); $('#cerrada').hidden = false;
-} else {
-  aplicarColores(F);
-  document.title = `${F.nombre} · Laboratorio de Comportamientos`;
-  $('#chip').textContent = `Momento ${Object.keys(FASES).indexOf(clave)+1} de 3`;
-  $('#titulo').textContent = `${F.nombre} · ${F.sub}`;
-  $('#pregunta').textContent = F.pregunta;
-  $('#ayuda').textContent = F.ayuda;
-  $('#texto').placeholder = F.ejemplo;
-  $('#graciasTxt').textContent = F.gracias;
-  $('#form').hidden = false;
+const areas = VALORES.map(v=>$('#t'+v.id));
+const listo = t => t.value.trim().length >= MIN;
+function guardarBorrador(){ try{ localStorage.setItem(BORRADOR, JSON.stringify(areas.map(t=>t.value))); }catch(e){} }
+function actualizar(){
+  let n = 0;
+  areas.forEach(t=>{ const ok = listo(t), card = t.closest('.valor'); if(ok) n++;
+    card.classList.toggle('ok', ok); if(ok) card.classList.remove('falta');
+    card.querySelector('.contador span').textContent = t.value.length; });
+  $('#prog').textContent = `${n} de 8 compromisos`;
+  $('#pbar').style.width = (n/8*100)+'%';
+  $('#enviar').classList.toggle('completo', n===8);
+  return n;
 }
+try{ const b = JSON.parse(localStorage.getItem(BORRADOR)||'null'); if(Array.isArray(b)) b.forEach((x,i)=>{ if(areas[i] && typeof x==='string') areas[i].value = x; }); }catch(e){}
+areas.forEach(t=>t.addEventListener('input', ()=>{ actualizar(); guardarBorrador(); $('#error').style.display='none'; }));
+actualizar();
 
-const ta = $('#texto'), btn = $('#enviar');
-ta.addEventListener('input', ()=>{ $('#cuenta').textContent = ta.value.length; btn.disabled = ta.value.trim().length < 3; $('#error').style.display='none'; });
+if(!ABIERTA){ $('#form').hidden = true; $('#barra').hidden = true; $('#cerrada').hidden = false; }
 
+const nuevoId = ()=> (crypto.randomUUID ? crypto.randomUUID() :
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{ const r=Math.random()*16|0; return (c==='x'?r:(r&3|8)).toString(16); }));
+
+const btn = $('#enviar');
 btn.addEventListener('click', async ()=>{
-  const texto = ta.value.trim(); if(texto.length<3) return;
+  if(actualizar() < 8){
+    const faltan = areas.filter(t=>!listo(t));
+    faltan.forEach(t=>t.closest('.valor').classList.add('falta'));
+    const err=$('#error'); err.textContent = faltan.length===1 ? 'Te falta 1 compromiso.' : `Te faltan ${faltan.length} compromisos.`; err.style.display='block';
+    faltan[0].closest('.valor').scrollIntoView({behavior:'smooth', block:'center'}); setTimeout(()=>faltan[0].focus({preventScroll:true}), 400);
+    return;
+  }
   btn.disabled = true; btn.textContent = 'Enviando…';
+  const envio = nuevoId();
+  const filas = VALORES.map((v,i)=>({ envio, valor:v.id, texto:areas[i].value.trim() }));
   try{
-    if(PRUEBA){ await new Promise(r=>setTimeout(r,600)); console.info('[modo prueba] aporte no guardado:', {fase:clave, texto}); }
+    if(PRUEBA){ await new Promise(r=>setTimeout(r,600)); console.info('[modo prueba] no guardado:', filas); }
     else{
       const r = await fetch(`${SUPABASE_URL}/rest/v1/${TABLA}`, {
         method:'POST',
         headers:{ 'apikey':SUPABASE_KEY, 'Authorization':`Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json', 'Prefer':'return=minimal' },
-        body: JSON.stringify({ fase:clave, texto })
+        body: JSON.stringify(filas)
       });
       if(!r.ok) throw new Error(r.status);
     }
-    $('#form').hidden = true; $('#gracias').hidden = false; ta.value=''; $('#cuenta').textContent='0';
+    try{ localStorage.removeItem(BORRADOR); }catch(e){}
+    areas.forEach(t=>t.value=''); actualizar();
+    $('#form').hidden = true; $('#barra').hidden = true; $('#gracias').hidden = false; scrollTo({top:0});
   }catch(e){
-    const err=$('#error'); err.textContent='No pudimos enviar tu aporte. Revisa tu conexión e inténtalo de nuevo.'; err.style.display='block';
-    btn.disabled = false;
-  }finally{ btn.textContent = 'Enviar mi aporte'; }
+    const err=$('#error'); err.textContent='No pudimos enviar tus compromisos. Revisa tu conexión e inténtalo de nuevo; lo que escribiste no se pierde.'; err.style.display='block';
+  }finally{ btn.disabled = false; btn.textContent = 'Enviar mis 8 compromisos'; }
 });
-$('#otro').addEventListener('click', ()=>{ $('#gracias').hidden = true; $('#form').hidden = false; btn.disabled = true; ta.focus(); });
+$('#otro').addEventListener('click', ()=>{ $('#gracias').hidden = true; $('#form').hidden = false; $('#barra').hidden = false; scrollTo({top:0}); areas[0].focus(); });
 </script>
 </body>
 </html>
