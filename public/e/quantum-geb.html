@@ -28,7 +28,7 @@ var CONSULTA_MS = 5000;   // cada cuánto revisa qué sección está habilitada
   --gris:#E8E8EC;--tinta:#10163F;--suave:#5C6385;--linea:#DCDDE6;--ok:#3E9E3A;--aj:#F2A516;--no:#E0474C;
   --font:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;--sombra:0 1px 2px rgba(7,21,117,.08),0 10px 28px rgba(7,21,117,.14)}
 *{box-sizing:border-box}
-html,body{margin:0;background:#EEF0F6;color:var(--tinta);font-family:var(--font);font-size:16.5px;line-height:1.42;-webkit-text-size-adjust:100%}
+html,body{margin:0;background:#EEF0F6;color:var(--tinta);font-family:var(--font);font-size:17.5px;line-height:1.45;-webkit-text-size-adjust:100%}
 body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(900px 480px at 90% -10%,rgba(9,49,198,.22),transparent 60%),radial-gradient(700px 420px at -10% 110%,rgba(0,184,248,.14),transparent 60%),#EEF0F6}
 header.top{background:linear-gradient(110deg,#000967 0%,#0931C6 60%,#1A3ED3 100%);position:relative;padding:12px 0 14px;box-shadow:0 6px 22px rgba(0,9,103,.35);overflow:hidden}
 header.top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--lima),var(--cian) 45%,var(--naranja))}
@@ -45,7 +45,7 @@ main{max-width:640px;margin:0 auto;padding:14px 14px 70px}
 .kick b{display:inline-block;font-style:normal;background:var(--cian);color:#fff;border-radius:999px;padding:2px 9px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin-left:6px;vertical-align:1px}
 h2{font-size:21px;line-height:1.2;color:var(--navy);margin:0 0 8px;font-weight:800;font-style:italic}
 h3{font-size:16px;color:var(--navy);margin:0 0 6px}
-p{margin:0 0 10px}.muted{color:var(--suave);font-size:15px}
+p{margin:0 0 10px}.muted{color:var(--suave);font-size:16px}
 label.f{display:block;font-weight:700;font-size:14.5px;margin:12px 0 6px;color:var(--navy)}
 input[type=text],input[type=date],textarea,select{width:100%;font:inherit;border:1.5px solid #CDD0DE;border-radius:12px;padding:11px 12px;background:#FAFBFF;color:var(--tinta)}
 textarea{min-height:88px;resize:vertical}
@@ -85,15 +85,15 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--azul);bo
 .ficha{background:linear-gradient(150deg,#071575,#0931C6);color:#fff;border-radius:14px;padding:16px;margin-bottom:6px}
 .ficha .cod{font:800 12px var(--font);color:var(--ambar);letter-spacing:.08em}
 .ficha h3{color:#fff;font-size:18px;margin:4px 0 6px;font-style:italic}
-.ficha details{font-size:14.5px;color:#DDE3FF;margin-top:6px}.ficha summary{cursor:pointer;color:#fff;font-weight:700}
+.ficha details{font-size:15.5px;color:#DDE3FF;margin-top:6px}.ficha summary{cursor:pointer;color:#fff;font-weight:700}
 .ficha ol{margin:8px 0 0;padding-left:18px}.ficha li{margin:4px 0}
 .crit{border:1px solid var(--linea);border-radius:12px;padding:12px;margin-top:10px;background:#FAFBFF}
-.crit .t{font-weight:800;color:var(--navy)}.crit .p{font-size:14px;color:var(--suave);margin-bottom:8px}
+.crit .t{font-weight:800;color:var(--navy)}.crit .p{font-size:15px;color:var(--suave);margin-bottom:8px}
 .crit input{margin-top:8px}
 .carta{border:1.5px solid var(--linea);border-radius:14px;padding:14px;margin-top:12px;background:#fff}
 .carta .cod{font:800 12px var(--font);color:var(--naranja)}
 .carta .near{font-size:13px;color:var(--suave)}
-.row5{display:grid;grid-template-columns:1fr 160px;gap:8px;align-items:center;padding:7px 0;border-top:1px dashed var(--linea);font-size:14px}
+.row5{display:grid;grid-template-columns:1fr 168px;gap:8px;align-items:center;padding:8px 0;border-top:1px dashed var(--linea);font-size:15px}
 .row5 .seg button{padding:7px 2px;font-size:12px}
 .si{font:800 12px var(--font);color:var(--ok);margin-top:8px}
 .stepper{display:flex;align-items:center;gap:10px}
@@ -124,6 +124,13 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--azul);bo
 .estado i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
 .estado.off i{background:var(--no)}
 footer{text-align:center;color:var(--suave);font-size:12px;padding:10px 0 30px}
+.lectura{background:#E8F0FF;border:1px solid #B9CCFF;color:#071575;border-radius:12px;padding:10px 12px;font-size:15px;margin:0 0 12px}
+.lectura b{color:#0931C6}
+.solo input,.solo textarea,.solo select{background:#F2F3F8;color:#5C6385}
+.resumen{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:12px;box-shadow:var(--sombra)}
+.resumen .r{display:grid;grid-template-columns:1fr 90px 60px;gap:6px;align-items:center;padding:5px 0;border-top:1px solid var(--linea);font-size:14.5px}
+.resumen .r:first-of-type{border-top:0}
+.resumen .bar{height:8px;border-radius:6px;background:#EEF0F6;overflow:hidden}.resumen .bar i{display:block;height:100%;background:var(--ok)}
 </style>
 </head>
 <body>
@@ -177,8 +184,7 @@ var SEC=[
  {k:'vf',p:'Parte 1 · Comprensión',t:'¿Verdadero o falso?',tipo:'individual'},
  {k:'core',p:'Parte 2 · Validación Core',t:'Validar con criterios y sustento',tipo:'grupal'},
  {k:'horizon',p:'Parte 2 · Póker de Horizon',t:'Cinco preguntas antes de poner una ficha',tipo:'grupal'},
- {k:'mercado',p:'Parte 2 · Horizon en mi filial',t:'¿Cuáles quiero ya como Core en mi negocio?',tipo:'individual'},
- {k:'compromisos',p:'Parte 3 · Lead, Flow y Mastery',t:'Responsable y plazo de mi filial',tipo:'individual'},
+ {k:'mercado',p:'Parte 2 · Decisión de la mesa',t:'¿Qué competencia Horizon pasaría a Core?',tipo:'grupal'},
  {k:'tensiones_c',act:'tensiones',m:'cierre',p:'Parte 3 · Tres situaciones',t:'Votamos de nuevo',tipo:'individual'},
  {k:'aprendizajes',p:'Parte 3 · Cierre',t:'Ronda de aprendizajes',tipo:'individual'},
  {k:'fin',p:'Cierre',t:'Gracias por participar'}];
@@ -208,7 +214,7 @@ function estadoDesde(rows){ // misma lógica que la función quantum_estado() de
   rows.forEach(function(r){
     if(r.actividad==='registro'&&(!mb[r.pid]||mb[r.pid].creado_en<=r.creado_en))mb[r.pid]={pid:r.pid,nombre:r.nombre,filial:r.filial,cargo:(r.datos||{}).cargo,mesa:r.mesa,creado_en:r.creado_en};
     if(r.actividad==='lider'&&(!ld[r.mesa]||ld[r.mesa].creado_en<=r.creado_en))ld[r.mesa]={pid:r.pid,nombre:r.nombre,creado_en:r.creado_en};
-    if(['conexion','core','horizon'].indexOf(r.actividad)>=0)gr[r.actividad+'|'+r.mesa+'|'+((r.datos||{}).comp||'')]=1;
+    if(['conexion','core','horizon','mercado'].indexOf(r.actividad)>=0)gr[r.actividad+'|'+r.mesa+'|'+((r.datos||{}).comp||'')]=1;
     if(r.pid===PID)mias[r.actividad+'|'+(r.momento||'')]=1;});
   return {miembros:Object.keys(mb).map(function(k){return mb[k];}),lideres:ld,grupales:Object.keys(gr).map(function(k){var p=k.split('|');return {a:p[0],m:+p[1],c:p[2]||null};}),mias:Object.keys(mias)};
 }
@@ -281,8 +287,16 @@ function panelMesa(){var mm=miembrosMesa(REG.mesa),l=lider(REG.mesa),m=mesaInfo(
    (l?(l.pid===PID?'<p class="si">Tú registras por la mesa.</p>':'<p class="muted" style="font-size:14px;margin-top:8px">Registra por la mesa: <b>'+esc(l.nombre)+'</b></p><button class="btn ghost sm" onclick="serLider()">Asumir yo el registro</button>'):'<button class="btn nar sm" onclick="serLider()">Seré el líder de la mesa</button>')+'</div>';}
 window.serLider=function(){if(!REG)return;enviar({actividad:'lider',mesa:REG.mesa,nombre:REG.nombre,filial:REG.filial,datos:{}}).then(function(){EST.lideres[REG.mesa]={pid:PID,nombre:REG.nombre};render(true);}).catch(function(){alertaErr();});};
 function alertaErr(){var e=document.getElementById('err');if(e)e.textContent='No se pudo enviar. Revisa la conexión e inténtalo de nuevo.';}
-function grupalBloqueada(s){
-  if(soyLider())return false;var l=lider(REG.mesa);
+var LECTURA=false;
+function aplicarLectura(s){var l=lider(REG.mesa);
+  [].forEach.call(app.querySelectorAll('input,textarea,select'),function(e){e.disabled=true;e.placeholder='';});
+  [].forEach.call(app.querySelectorAll('[data-g],.stepper button,#sug'),function(b){b.disabled=true;b.onclick=null;b.style.cursor='default';});
+  var go=document.getElementById('go');if(go)go.remove();var er=document.getElementById('err');if(er)er.remove();
+  [].forEach.call(app.querySelectorAll('.card'),function(c){c.classList.add('solo');});
+  var first=app.querySelector('.card');if(first)first.insertAdjacentHTML('afterbegin','<div class="lectura">'+(l?'Solo lectura: registra <b>'+esc(l.nombre)+'</b>, líder de tu mesa. Lee las preguntas y participa en la conversación.':'Solo lectura: tu mesa aún no tiene líder. Elijan quién registra por el grupo (abajo).')+'</div>');
+  app.insertAdjacentHTML('beforeend',panelMesa());DRAFT_KEY=null;}
+function grupalBloqueada(s){return false;
+  var l=lider(REG.mesa);
   h('<div class="card">'+cabecera(s)+'<p>'+(l?'En esta actividad registra <b>'+esc(l.nombre)+'</b>, líder de tu mesa. Participa en la conversación; su celular envía lo que acuerden.':'Tu mesa aún no tiene líder. Elijan quién registra por el grupo.')+'</p>'+estadoGrupal(s)+'</div>'+panelMesa());
   return true;}
 function estadoGrupal(s){var done=EST.grupales.filter(function(g){return g.a===s.k&&g.m==REG.mesa;});
@@ -312,7 +326,7 @@ R.core=function(s){
   if(grupalBloqueada(s))return;
   var done=EST.grupales.filter(function(g){return g.a==='core'&&g.m==REG.mesa;}).map(function(g){return g.c;});
   var tabs='<div class="tabs">'+CORE.map(function(x,i){return '<button class="tab'+(i===CI?' on':'')+(done.indexOf(x.id)>=0?' done':'')+'" onclick="coreTab('+i+')">'+x.id+'</button>';}).join('')+'<button class="tab'+(CI===5?' on':'')+(done.indexOf('CIERRE')>=0?' done':'')+'" onclick="coreTab(5)">Pregunta final</button></div>';
-  var intro='<div class="card">'+cabecera(s)+'<p class="muted">Califiquen cada competencia en los cinco criterios: <b>cumple</b>, <b>cumple con ajustes</b> o <b>no cumple</b>. Si no es «cumple», escriban una línea de sustento y citen el nivel (ej.: QC-01 nivel 3). No hay puntaje. Al final respondan la pregunta sobre cómo describir los niveles.</p>'+estadoGrupal(s)+'</div>';
+  var intro='<div class="card">'+cabecera(s)+'<p class="muted">Revisen la <b>definición</b> y los <b>cinco niveles de dominio</b> de cada competencia (también están en el cuadernillo). Luego califiquen los cinco criterios: <b>cumple</b>, <b>cumple con ajustes</b> o <b>no cumple</b>. Si no es «cumple», escriban una línea de sustento y citen el nivel (ej.: QC-01 nivel 3). No hay puntaje. Al final respondan la pregunta sobre cómo describir los niveles.</p>'+estadoGrupal(s)+'</div>';
   if(CI===5){
     h(intro+'<div class="card">'+tabs+'<h3>Pregunta de cierre · ¿cada nivel en Ser, Saber y Hacer?</h3><p class="muted" style="font-size:14.5px">Hoy el modelo describe cada nivel con tres indicadores (Ser, Saber y Hacer), cada uno con su evidencia observable. ¿El modelo debe describir cada nivel en estas tres dimensiones o en una sola descripción por nivel?</p>'+
       '<div class="chips" style="flex-direction:column">'+opt('cierre','op','tres','<b>Mantener las tres dimensiones</b><br><small>Da evidencia para evaluar; es la base de la carga en SAP.</small>','chip')+opt('cierre','op','una','<b>Una descripción por nivel</b><br><small>Más simple: 25 descripciones; exige definir cómo evaluar cada cargo.</small>','chip')+opt('cierre','op','otra','<b>Otra</b>','chip')+'</div>'+
@@ -320,7 +334,7 @@ R.core=function(s){
     [].forEach.call(app.querySelectorAll('.chips .chip'),function(b){b.style.textAlign='left';b.style.borderRadius='12px';});
     DRAFT_KEY='core_cierre';restaurarBorrador();return;}
   var c=CORE[CI];
-  h(intro+'<div class="card">'+tabs+'<div class="ficha"><div class="cod">'+c.id+'</div><h3>'+esc(c.n)+'</h3><div style="color:#FFD9A6;font-size:14px">'+esc(c.pr)+'</div><details><summary>Definición</summary><p style="margin-top:8px">'+esc(c.d)+'</p></details><details open><summary>Los cinco niveles</summary><ol>'+c.niv.map(function(t,i){return '<li><b>'+NIVN[i]+'</b> · '+esc(t)+'</li>';}).join('')+'</ol></details></div>'+
+  h(intro+'<div class="card">'+tabs+'<div class="ficha"><div class="cod">'+c.id+'</div><h3>'+esc(c.n)+'</h3><div style="color:#FFD9A6;font-size:14px">'+esc(c.pr)+'</div><details open><summary>Definición</summary><p style="margin-top:8px">'+esc(c.d)+'</p></details><details open><summary>Los cinco niveles</summary><ol>'+c.niv.map(function(t,i){return '<li><b>'+NIVN[i]+'</b> · '+esc(t)+'</li>';}).join('')+'</ol></details></div>'+
    CRIT.map(function(k,i){return '<div class="crit"><div class="t">'+(i+1)+'. '+k.n+'</div><div class="p">'+esc(k.p)+'</div><div class="seg">'+opt('c',k.k,'C','Cumple','C')+opt('c',k.k,'A','Cumple con ajustes','A')+opt('c',k.k,'N','No cumple','N')+'</div><input type="text" id="s_'+k.k+'" maxlength="220" placeholder="Por qué y nivel (ej.: '+c.id+' nivel 3)"></div>';}).join('')+
    pie('Enviar '+c.id)+'</div>');
   DRAFT_KEY='core_'+c.id;restaurarBorrador();};
@@ -330,21 +344,26 @@ R.horizon=function(s){
   function fichas(){var F=(SEL.f||{}),t=0;HZ.forEach(function(h){t+=+(F[h.id]||0);});return t;}
   function pozo(){var t=fichas(),x='';for(var i=0;i<3;i++)x+='<span class="fp'+(i<3-t?'':' off')+'"></span>';return x+'<b>'+(3-t)+' ficha'+(3-t===1?'':'s')+' por apostar</b>';}
   function cuentaSi(id){var q=SEL['hq_'+id]||{},n=0;for(var i=0;i<5;i++)if(q[i]==='S')n++;return n;}
-  window.hzStep=function(id,d){SEL.f=SEL.f||{};var c=+(SEL.f[id]||0);if(d>0&&fichas()>=3)return;if(d<0&&c<=0)return;SEL.f[id]=c+d;document.getElementById('f_'+id).textContent=SEL.f[id];document.getElementById('pozo').innerHTML=pozo();guardarBorrador();};
-  h('<div class="card">'+cabecera(s)+'<p class="muted">Califiquen <b>cada carta</b> con las cinco preguntas (Sí, Dudoso o No). Al final pongan sus <b>3 fichas</b> en las cartas con más «Sí» y mejor sustentadas: una ficha significa <i>esta competencia debería ser Core</i>. Pueden ponerlas todas en una carta, repartirlas o no apostar. Las apuestas se revelan a la vez.</p>'+estadoGrupal(s)+'</div>'+
+  function resumen(){var arr=HZ.map(function(h){return [h,cuentaSi(h.id),+((SEL.f||{})[h.id]||0)];}).sort(function(a,b){return b[1]-a[1];});
+    return '<b style="color:var(--navy)">Tablero de la mesa · «Sí» por carta</b><div style="font-size:13px;color:var(--suave);margin:2px 0 6px">Las fichas van a las cartas con más «Sí».</div>'+arr.map(function(x){return '<div class="r"><span><b>'+x[0].id+'</b> '+esc(x[0].n)+'</span><div class="bar"><i style="width:'+(x[1]*20)+'%"></i></div><span style="text-align:right;font-weight:800;color:var(--navy)">'+x[1]+' Sí'+(x[2]?' · '+x[2]+'●':'')+'</span></div>';}).join('')+'<button type="button" class="btn ghost sm" id="sug" onclick="sugerir()">Repartir las 3 fichas según los «Sí»</button>';}
+  window.sugerir=function(){var arr=HZ.map(function(h){return [h.id,cuentaSi(h.id)];}).sort(function(a,b){return b[1]-a[1];}),f={};HZ.forEach(function(h){f[h.id]=0;});
+    if(arr[0][1]===0){SEL.f=f;}else if(arr[0][1]>=arr[1][1]+2){f[arr[0][0]]=3;}else if(arr[0][1]===arr[1][1]){f[arr[0][0]]=1;f[arr[1][0]]=1;if(arr[2][1]>0)f[arr[2][0]]=1;else f[arr[0][0]]=2;}else{f[arr[0][0]]=2;if(arr[1][1]>0)f[arr[1][0]]=1;else f[arr[0][0]]=3;}
+    SEL.f=f;window.trasRestaurar();guardarBorrador();};
+  window.hzStep=function(id,d){SEL.f=SEL.f||{};var c=+(SEL.f[id]||0);if(d>0&&fichas()>=3)return;if(d<0&&c<=0)return;SEL.f[id]=c+d;document.getElementById('f_'+id).textContent=SEL.f[id];document.getElementById('pozo').innerHTML=pozo();document.getElementById('resumen').innerHTML=resumen();guardarBorrador();};
+  h('<div class="card">'+cabecera(s)+'<p class="muted">Lean cada carta (definición y niveles) y califíquenla con las cinco preguntas: Sí, Dudoso o No. Luego miren el tablero de la mesa: sus <b>3 fichas</b> van a las cartas con <b>más «Sí»</b>. Si una gana con claridad, puede llevarse las 3; si hay empate, se reparten. Una ficha significa <i>esta competencia debería ser Core</i>. Escriban por qué ponen (o no) fichas en cada carta.</p>'+estadoGrupal(s)+'</div>'+
    '<div class="pozo" id="pozo"></div>'+
    HZ.map(function(c){return '<div class="carta"><div class="cod">Carta '+c.id+' · Core más cercana: '+esc(c.near)+'</div><h3 style="margin:3px 0">'+esc(c.n)+'</h3><p class="muted" style="font-size:14px;margin:4px 0 6px">'+esc(c.d)+'</p><p style="font-size:13px;color:#7A4310;margin:0 0 6px"><i>Para pensar:</i> '+esc(c.pp)+'</p>'+
      HQ.map(function(q,i){return '<div class="row5"><span><b>'+(i+1)+'. '+q.n+'</b><br><small style="color:var(--suave)">'+esc(q.p)+'</small></span><div class="seg">'+opt('hq_'+c.id,i,'S','Sí','S')+opt('hq_'+c.id,i,'D','Dudoso','D')+opt('hq_'+c.id,i,'N','No','N')+'</div></div>';}).join('')+
      '<div class="si" id="si_'+c.id+'"></div><label class="f" style="margin-top:8px">Por qué ponemos (o no) fichas aquí</label><input type="text" id="r_'+c.id+'" maxlength="300" placeholder="Una línea">'+
      '<div class="fichas-carta"><b style="color:var(--navy)">Fichas en esta carta</b><div class="stepper"><button type="button" onclick="hzStep(\''+c.id+'\',-1)">−</button><b id="f_'+c.id+'">0</b><button type="button" onclick="hzStep(\''+c.id+'\',1)">+</button></div></div></div>';}).join('')+
-   '<div class="card" style="margin-top:12px">'+pie('Enviar apuesta de la mesa')+'</div>');
-  window.trasElegir=function(g){if(g.indexOf('hq_')===0){var id=g.slice(3);document.getElementById('si_'+id).textContent=cuentaSi(id)+' de 5 en «Sí»';}};
-  window.trasRestaurar=function(){HZ.forEach(function(h){document.getElementById('f_'+h.id).textContent=+((SEL.f||{})[h.id]||0);document.getElementById('si_'+h.id).textContent=cuentaSi(h.id)+' de 5 en «Sí»';});document.getElementById('pozo').innerHTML=pozo();};
+   '<div class="resumen" id="resumen" style="margin-top:12px"></div><div class="card" style="margin-top:12px">'+pie('Enviar apuesta de la mesa')+'</div>');
+  window.trasElegir=function(g){if(g.indexOf('hq_')===0){var id=g.slice(3);document.getElementById('si_'+id).textContent=cuentaSi(id)+' de 5 en «Sí»';document.getElementById('resumen').innerHTML=resumen();}};
+  window.trasRestaurar=function(){HZ.forEach(function(h){document.getElementById('f_'+h.id).textContent=+((SEL.f||{})[h.id]||0);document.getElementById('si_'+h.id).textContent=cuentaSi(h.id)+' de 5 en «Sí»';});document.getElementById('pozo').innerHTML=pozo();document.getElementById('resumen').innerHTML=resumen();};
   DRAFT_KEY='horizon';restaurarBorrador();window.trasRestaurar();};
 R.mercado=function(s){
-  h('<div class="card">'+cabecera(s)+'<p class="muted">Piensa en <b>tu filial</b>: de las cinco competencias de futuro, ¿cuáles necesitas como Core <b>desde ya</b> en tu negocio y cuáles se quedan como capacidades de futuro?</p>'+
-   HZ.map(function(c,i){return '<div class="item"><div class="q"><span class="num">'+(i+1)+'</span><span><span style="color:var(--naranja);font-size:12px;font-weight:800">'+c.id+'</span><br>'+esc(c.n)+'</span></div><div class="two">'+opt('m',c.id,'core','Core ya en mi filial')+opt('m',c.id,'futuro','Se queda como futuro')+'</div></div>';}).join('')+
-   '<label class="f">¿Por qué? (opcional)</label>'+ta('mnota','Lo que hace urgente una competencia en tu negocio',300)+pie()+'</div>');
+  h('<div class="card">'+cabecera(s)+'<p class="muted">Después del debate en plenaria: según su mesa, ¿cuál de las competencias de futuro debería <b>pasar a ser Core</b> y cuáles se quedan en Horizon?</p>'+estadoGrupal(s)+
+   HZ.map(function(c,i){return '<div class="item"><div class="q"><span class="num">'+(i+1)+'</span><span><span style="color:var(--naranja);font-size:12px;font-weight:800">'+c.id+'</span><br>'+esc(c.n)+'</span></div><div class="two">'+opt('m',c.id,'core','Pasa a Core')+opt('m',c.id,'futuro','Se queda en Horizon')+'</div></div>';}).join('')+
+   '<label class="f">¿Por qué? (la razón de la mesa)</label>'+ta('mnota','Lo que lleva a la mesa a esta decisión',300)+pie('Enviar decisión de la mesa')+'</div>');
   DRAFT_KEY='mercado';restaurarBorrador();};
 R.compromisos=function(s){
   var blk=function(id,t,sub){return '<h3 style="margin-top:16px">'+t+'</h3><p class="muted" style="font-size:13.5px;margin:0">'+sub+'</p><label class="f">Responsable en '+esc(REG.filial)+'</label><input type="text" id="'+id+'r" maxlength="100" placeholder="Nombre o cargo"><label class="f">Fecha compromiso</label><input type="date" id="'+id+'p">';};
@@ -353,10 +372,7 @@ R.compromisos=function(s){
    '<label class="f">Otro compromiso de mi filial (opcional)</label>'+ta('otro','Algo más que tu filial se compromete a hacer',300)+pie('Confirmar compromisos')+'</div>');
   DRAFT_KEY='compromisos';restaurarBorrador();};
 R.aprendizajes=function(s){
-  h('<div class="card">'+cabecera(s)+'<p class="muted">Cada gerente comparte dos cosas y, si quiere, un compromiso personal.</p>'+
-   '<label class="f">Lo que me llevo</label>'+ta('llevo','Una idea, una certeza o una pregunta',300)+
-   '<label class="f">Lo que cambio en mi filial</label>'+ta('cambio','Una acción concreta',300)+
-   '<label class="f">Mi compromiso personal (opcional)</label>'+ta('comp','Qué haré y para cuándo',300)+pie()+'</div>');
+  h('<div class="card">'+cabecera(s)+'<label class="f" style="font-size:17px">¿Qué aprendizaje te llevas de esta sesión?</label>'+ta('llevo','Una idea, una certeza o una pregunta',300)+pie()+'</div>');
   DRAFT_KEY='aprendizajes';restaurarBorrador();};
 R.fin=function(){esperar('¡Gracias por participar!','Tras el taller recibirán el informe de resultados de la sala digital.');};
 
@@ -380,14 +396,16 @@ window.enviarForm=function(){
   if(s.k==='horizon'){var F=SEL.f||{},tot=0,cartas={};
     for(var j=0;j<HZ.length;j++){var c2=HZ[j],q=SEL['hq_'+c2.id]||{},nf=+(F[c2.id]||0);tot+=nf;
       for(var i2=0;i2<5;i2++)if(!q[i2]){err.textContent='Respondan las cinco preguntas de la carta '+c2.id+'.';return;}
-      if(nf>0&&val('r_'+c2.id).length<3){err.textContent='Escriban por qué ponen fichas en '+c2.id+'.';return;}
+      if(val('r_'+c2.id).length<3){err.textContent='Escriban por qué ponen (o no) fichas en '+c2.id+'.';return;}
       cartas[c2.id]={fichas:nf,razon:val('r_'+c2.id),preguntas:[0,1,2,3,4].map(function(x){return q[x];})};}
+    var SI={};HZ.forEach(function(h){var q=SEL['hq_'+h.id]||{},n=0;for(var z=0;z<5;z++)if(q[z]==='S')n++;SI[h.id]=n;});
+    for(var a1=0;a1<HZ.length;a1++)for(var b1=0;b1<HZ.length;b1++){var A=HZ[a1].id,Bq=HZ[b1].id;if(+(F[A]||0)>+(F[Bq]||0)&&SI[A]<SI[Bq]){err.textContent='Las fichas van a las cartas con más «Sí»: '+Bq+' tiene '+SI[Bq]+' «Sí» y '+A+' tiene '+SI[A]+', pero '+A+' tiene más fichas.';return;}}
     if(tot<3&&!confirmarNoApuesta()){err.innerHTML='Pusieron '+tot+' de 3 fichas. Si es su decisión, toquen de nuevo «Enviar».';return;}
     fila.datos.cartas=cartas;fila.datos.fichas=tot;}
-  if(s.k==='mercado'){var M=SEL.m||{};if(Object.keys(M).length<HZ.length){err.textContent='Marca las cinco competencias.';return;}fila.datos={sel:M,nota:val('mnota')};}
+  if(s.k==='mercado'){var M=SEL.m||{};if(Object.keys(M).length<HZ.length){err.textContent='Marquen las cinco competencias.';return;}if(val('mnota').length<3){err.textContent='Escriban la razón de la mesa.';return;}fila.datos.sel=M;fila.datos.nota=val('mnota');}
   if(s.k==='compromisos'){if(!val('lr')||!val('fr')||!val('mr')){err.textContent='Indica los responsables de Lead, Flow y Mastery.';return;}if(!val('lp')||!val('fp')||!val('mp')){err.textContent='Indica las fechas de compromiso.';return;}
     fila.datos={lead_resp:val('lr'),lead_fecha:val('lp'),flow_resp:val('fr'),flow_fecha:val('fp'),mastery_resp:val('mr'),mastery_fecha:val('mp'),otro:val('otro'),cargo:REG.cargo};}
-  if(s.k==='aprendizajes'){if(val('llevo').length<3||val('cambio').length<3){err.textContent='Completa lo que te llevas y lo que cambias.';return;}fila.datos={llevo:val('llevo'),cambio:val('cambio'),compromiso:val('comp'),cargo:REG.cargo};}
+  if(s.k==='aprendizajes'){if(val('llevo').length<3){err.textContent='Escribe tu aprendizaje.';return;}fila.datos={llevo:val('llevo'),cargo:REG.cargo};}
   var bt=document.getElementById('go');bt.disabled=true;bt.textContent='Enviando…';
   enviar(fila).then(function(){
     if(s.k==='registro'){REG={nombre:fila.nombre,cargo:fila.datos.cargo,filial:fila.filial,mesa:fila.mesa};ls('reg',REG);EST.miembros.push({pid:PID,nombre:REG.nombre,filial:REG.filial,cargo:REG.cargo,mesa:REG.mesa});ls('draft_registro',null);render(true);return;}
@@ -413,7 +431,7 @@ function render(forzar){
   if(k!=='fin'&&k!=='core'&&s.tipo==='individual'&&hecho(k)&&!EDITANDO[k]){yaEnviado(s);return;}
   if(s.tipo==='grupal'&&k!=='core'&&!EDITANDO[k]&&EST.grupales.some(function(g){return g.a===k&&g.m==REG.mesa;})&&soyLider()){yaEnviado(s);return;}
   if(k==='core'&&soyLider()&&!EDITANDO.core){var d=EST.grupales.filter(function(g){return g.a==='core'&&g.m==REG.mesa;}).map(function(g){return g.c;});if(CORE.every(function(x){return d.indexOf(x.id)>=0;})&&d.indexOf('CIERRE')>=0){yaEnviado(s);return;}}
-  window.scrollTo(0,0);R[k](s);
+  LECTURA=s.tipo==='grupal'&&!soyLider();window.scrollTo(0,0);R[k](s);if(LECTURA)aplicarLectura(s);
 }
 var ACT_PREV=ls('act_prev');
 function ciclo(){consultar().then(function(){
