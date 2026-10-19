@@ -340,26 +340,36 @@ R.core=function(s){
    pie('Enviar '+c.id)+'</div>');
   DRAFT_KEY='core_'+c.id;restaurarBorrador();};
 window.coreTab=function(i){CI=i;ls('core_tab',i);render(true);};
+function repartoFichas(arr){/* arr=[[id,si],...] en orden de cartas. Regla de la mesa: 3 fichas de mayor a menor «Sí» */
+  var o=arr.map(function(x,i){return [x[0],x[1],i];}).sort(function(a,b){return b[1]-a[1]||a[2]-b[2];}),f={},nota='';arr.forEach(function(x){f[x[0]]=0;});
+  var c=o.filter(function(x){return x[1]>0;});
+  if(!c.length)return {f:f,nota:'Ninguna carta tiene «Sí»: la mesa no apuesta fichas.'};
+  if(c.length===1||c[0][1]>=c[1][1]+2){f[c[0][0]]=3;nota=c[0][0]+' gana con claridad: se lleva las 3 fichas.';}
+  else if(c[0][1]===c[1][1]){var emp=c.filter(function(x){return x[1]===c[0][1];});
+    if(emp.length>=3){emp.slice(0,3).forEach(function(x){f[x[0]]=1;});nota='Empate en el primer lugar: una ficha para cada una'+(emp.length>3?' (con más de tres empatadas, van a las tres primeras en el orden de las cartas)':'')+'.';}
+    else{f[c[0][0]]=1;f[c[1][0]]=1;if(c[2]){var t=c.filter(function(x,i){return i>=2&&x[1]===c[2][1];});f[c[2][0]]=1;nota='Empate en el primer lugar: una ficha para cada una y la tercera para '+c[2][0]+', la siguiente en «Sí»'+(t.length>1?' (empate: va a la primera en el orden de las cartas)':'')+'.';}
+      else nota='Empate en el primer lugar: una ficha para cada una; la tercera no se usa porque ninguna otra carta tiene «Sí».';}}
+  else{f[c[0][0]]=2;var s2=c.filter(function(x,i){return i>=1&&x[1]===c[1][1];});f[c[1][0]]=1;nota=c[0][0]+' tiene más «Sí»: 2 fichas; '+c[1][0]+' le sigue: 1 ficha'+(s2.length>1?' (empate en el segundo lugar: va a la primera en el orden de las cartas)':'')+'.';}
+  return {f:f,nota:nota};}
 R.horizon=function(s){
   if(grupalBloqueada(s))return;
   function fichas(){var F=(SEL.f||{}),t=0;HZ.forEach(function(h){t+=+(F[h.id]||0);});return t;}
-  function pozo(){var t=fichas(),x='';for(var i=0;i<3;i++)x+='<span class="fp'+(i<3-t?'':' off')+'"></span>';return x+'<b>'+(3-t)+' ficha'+(3-t===1?'':'s')+' por apostar</b>';}
+  function pozo(){var t=fichas(),x='';for(var i=0;i<3;i++)x+='<span class="fp'+(i<3-t?'':' off')+'"></span>';return x+'<b>'+t+' de 3 fichas repartidas según los «Sí»</b>';}
   function cuentaSi(id){var q=SEL['hq_'+id]||{},n=0;for(var i=0;i<5;i++)if(q[i]==='S')n++;return n;}
   function resumen(){var arr=HZ.map(function(h){return [h,cuentaSi(h.id),+((SEL.f||{})[h.id]||0)];}).sort(function(a,b){return b[1]-a[1];});
-    return '<b style="color:var(--navy)">Tablero de la mesa · «Sí» por carta</b><div style="font-size:13px;color:var(--suave);margin:2px 0 6px">Las fichas van a las cartas con más «Sí».</div>'+arr.map(function(x){return '<div class="r"><span><b>'+x[0].id+'</b> '+esc(x[0].n)+'</span><div class="bar"><i style="width:'+(x[1]*20)+'%"></i></div><span style="text-align:right;font-weight:800;color:var(--navy)">'+x[1]+' Sí'+(x[2]?' · '+x[2]+'●':'')+'</span></div>';}).join('')+'<button type="button" class="btn ghost sm" id="sug" onclick="sugerir()">Repartir las 3 fichas según los «Sí»</button>';}
-  window.sugerir=function(){var arr=HZ.map(function(h){return [h.id,cuentaSi(h.id)];}).sort(function(a,b){return b[1]-a[1];}),f={};HZ.forEach(function(h){f[h.id]=0;});
-    if(arr[0][1]===0){SEL.f=f;}else if(arr[0][1]>=arr[1][1]+2){f[arr[0][0]]=3;}else if(arr[0][1]===arr[1][1]){f[arr[0][0]]=1;f[arr[1][0]]=1;if(arr[2][1]>0)f[arr[2][0]]=1;else f[arr[0][0]]=2;}else{f[arr[0][0]]=2;if(arr[1][1]>0)f[arr[1][0]]=1;else f[arr[0][0]]=3;}
-    SEL.f=f;window.trasRestaurar();guardarBorrador();};
-  window.hzStep=function(id,d){SEL.f=SEL.f||{};var c=+(SEL.f[id]||0);if(d>0&&fichas()>=3)return;if(d<0&&c<=0)return;SEL.f[id]=c+d;document.getElementById('f_'+id).textContent=SEL.f[id];document.getElementById('pozo').innerHTML=pozo();document.getElementById('resumen').innerHTML=resumen();guardarBorrador();};
-  h('<div class="card">'+cabecera(s)+'<p class="muted">Lean cada carta (definición y niveles) y califíquenla con las cinco preguntas: Sí, Dudoso o No. Luego miren el tablero de la mesa: sus <b>3 fichas</b> van a las cartas con <b>más «Sí»</b>. Si una gana con claridad, puede llevarse las 3; si hay empate, se reparten. Una ficha significa <i>esta competencia debería ser Core</i>. Escriban por qué ponen (o no) fichas en cada carta.</p>'+estadoGrupal(s)+'</div>'+
+    return '<b style="color:var(--navy)">Tablero de la mesa · «Sí» por carta</b><div style="font-size:13px;color:var(--suave);margin:2px 0 6px">Las fichas se reparten solas, de mayor a menor «Sí».</div>'+arr.map(function(x){return '<div class="r"><span><b>'+x[0].id+'</b> '+esc(x[0].n)+'</span><div class="bar"><i style="width:'+(x[1]*20)+'%"></i></div><span style="text-align:right;font-weight:800;color:var(--navy)">'+x[1]+' Sí'+(x[2]?' · '+x[2]+'●':'')+'</span></div>';}).join('')+'';}
+  function auto(){var r=repartoFichas(HZ.map(function(h){return [h.id,cuentaSi(h.id)];}));SEL.f=r.f;return r;}
+  window.hzPintar=function(){var r=auto();HZ.forEach(function(h){document.getElementById('f_'+h.id).innerHTML=fichaPuntos(+(r.f[h.id]||0));document.getElementById('si_'+h.id).textContent=cuentaSi(h.id)+' de 5 en «Sí»';});document.getElementById('pozo').innerHTML=pozo();document.getElementById('resumen').innerHTML=resumen()+'<div style="font-size:13.5px;color:var(--navy);margin-top:8px;font-weight:600">'+esc(r.nota)+'</div>';};
+  function fichaPuntos(n){var x='';for(var i=0;i<n;i++)x+='<span class="fp" style="display:inline-block;margin-left:3px"></span>';return n?x+' <b>'+n+'</b>':'<span style="color:var(--suave)">0</span>';}
+  h('<div class="card">'+cabecera(s)+'<p class="muted">Lean cada carta (definición y niveles) y califíquenla con las cinco preguntas: Sí, Dudoso o No. Luego miren el tablero de la mesa: las <b>3 fichas se reparten solas</b> según los «Sí», de mayor a menor: si una carta gana con claridad (2 o más «Sí» de ventaja) se lleva las 3; si gana por uno, 2 para ella y 1 para la siguiente; si hay empate, una para cada una. Una ficha significa <i>esta competencia debería ser Core</i>. Escriban por qué ponen (o no) fichas en cada carta.</p>'+estadoGrupal(s)+'</div>'+
    '<div class="pozo" id="pozo"></div>'+
    HZ.map(function(c){return '<div class="carta"><div class="cod">Carta '+c.id+' · Core más cercana: '+esc(c.near)+'</div><h3 style="margin:3px 0">'+esc(c.n)+'</h3><p class="muted" style="font-size:14px;margin:4px 0 6px">'+esc(c.d)+'</p><p style="font-size:13px;color:#7A4310;margin:0 0 6px"><i>Para pensar:</i> '+esc(c.pp)+'</p>'+
      HQ.map(function(q,i){return '<div class="row5"><span><b>'+(i+1)+'. '+q.n+'</b><br><small style="color:var(--suave)">'+esc(q.p)+'</small></span><div class="seg">'+opt('hq_'+c.id,i,'S','Sí','S')+opt('hq_'+c.id,i,'D','Dudoso','D')+opt('hq_'+c.id,i,'N','No','N')+'</div></div>';}).join('')+
-     '<div class="si" id="si_'+c.id+'"></div><label class="f" style="margin-top:8px">Por qué ponemos (o no) fichas aquí</label><input type="text" id="r_'+c.id+'" maxlength="300" placeholder="Una línea">'+
-     '<div class="fichas-carta"><b style="color:var(--navy)">Fichas en esta carta</b><div class="stepper"><button type="button" onclick="hzStep(\''+c.id+'\',-1)">−</button><b id="f_'+c.id+'">0</b><button type="button" onclick="hzStep(\''+c.id+'\',1)">+</button></div></div></div>';}).join('')+
+     '<div class="si" id="si_'+c.id+'"></div><label class="f" style="margin-top:8px">Por qué la mesa califica así esta carta</label><input type="text" id="r_'+c.id+'" maxlength="300" placeholder="Una línea">'+
+     '<div class="fichas-carta"><b style="color:var(--navy)">Fichas en esta carta <small style="font-weight:600;color:var(--suave)">(automático)</small></b><div id="f_'+c.id+'">0</div></div></div>';}).join('')+
    '<div class="resumen" id="resumen" style="margin-top:12px"></div><div class="card" style="margin-top:12px">'+pie('Enviar apuesta de la mesa')+'</div>');
-  window.trasElegir=function(g){if(g.indexOf('hq_')===0){var id=g.slice(3);document.getElementById('si_'+id).textContent=cuentaSi(id)+' de 5 en «Sí»';document.getElementById('resumen').innerHTML=resumen();}};
-  window.trasRestaurar=function(){HZ.forEach(function(h){document.getElementById('f_'+h.id).textContent=+((SEL.f||{})[h.id]||0);document.getElementById('si_'+h.id).textContent=cuentaSi(h.id)+' de 5 en «Sí»';});document.getElementById('pozo').innerHTML=pozo();document.getElementById('resumen').innerHTML=resumen();};
+  window.trasElegir=function(g){if(g.indexOf('hq_')===0){hzPintar();guardarBorrador();}};
+  window.trasRestaurar=function(){hzPintar();};
   DRAFT_KEY='horizon';restaurarBorrador();window.trasRestaurar();};
 R.mercado=function(s){
   h('<div class="card">'+cabecera(s)+'<p class="muted">Después del debate en plenaria: según su mesa, ¿cuál de las competencias de futuro debería <b>pasar a ser Core</b> y cuáles se quedan en Horizon?</p>'+estadoGrupal(s)+
@@ -394,14 +404,11 @@ window.enviarForm=function(){
     else{var cc=CORE[CI],sc=SEL.c||{},cr={};
       for(var i=0;i<CRIT.length;i++){var k=CRIT[i].k;if(!sc[k]){err.textContent='Califiquen el criterio '+CRIT[i].n+'.';return;}var su=val('s_'+k);if(sc[k]!=='C'&&su.length<3){err.textContent='Escriban por qué en '+CRIT[i].n+' (no es «cumple»).';return;}cr[k]={v:sc[k],s:su};}
       fila.datos.comp=cc.id;fila.datos.criterios=cr;clave='core_'+cc.id;}}
-  if(s.k==='horizon'){var F=SEL.f||{},tot=0,cartas={};
+  if(s.k==='horizon'){var F=repartoFichas(HZ.map(function(h){var q=SEL['hq_'+h.id]||{},n=0;for(var z=0;z<5;z++)if(q[z]==='S')n++;return [h.id,n];})).f,tot=0,cartas={};SEL.f=F;
     for(var j=0;j<HZ.length;j++){var c2=HZ[j],q=SEL['hq_'+c2.id]||{},nf=+(F[c2.id]||0);tot+=nf;
       for(var i2=0;i2<5;i2++)if(!q[i2]){err.textContent='Respondan las cinco preguntas de la carta '+c2.id+'.';return;}
-      if(val('r_'+c2.id).length<3){err.textContent='Escriban por qué ponen (o no) fichas en '+c2.id+'.';return;}
+      if(val('r_'+c2.id).length<3){err.textContent='Escriban por qué califican así la carta '+c2.id+'.';return;}
       cartas[c2.id]={fichas:nf,razon:val('r_'+c2.id),preguntas:[0,1,2,3,4].map(function(x){return q[x];})};}
-    var SI={};HZ.forEach(function(h){var q=SEL['hq_'+h.id]||{},n=0;for(var z=0;z<5;z++)if(q[z]==='S')n++;SI[h.id]=n;});
-    for(var a1=0;a1<HZ.length;a1++)for(var b1=0;b1<HZ.length;b1++){var A=HZ[a1].id,Bq=HZ[b1].id;if(+(F[A]||0)>+(F[Bq]||0)&&SI[A]<SI[Bq]){err.textContent='Las fichas van a las cartas con más «Sí»: '+Bq+' tiene '+SI[Bq]+' «Sí» y '+A+' tiene '+SI[A]+', pero '+A+' tiene más fichas.';return;}}
-    if(tot<3&&!confirmarNoApuesta()){err.innerHTML='Pusieron '+tot+' de 3 fichas. Si es su decisión, toquen de nuevo «Enviar».';return;}
     fila.datos.cartas=cartas;fila.datos.fichas=tot;}
   if(s.k==='mercado'){var M=SEL.m||{};if(Object.keys(M).length<HZ.length){err.textContent='Marquen las cinco competencias.';return;}if(val('mnota').length<3){err.textContent='Escriban la razón de la mesa.';return;}fila.datos.sel=M;fila.datos.nota=val('mnota');}
   if(s.k==='compromisos'){if(!val('lr')||!val('fr')||!val('mr')){err.textContent='Indica los responsables de Lead, Flow y Mastery.';return;}if(!val('lp')||!val('fp')||!val('mp')){err.textContent='Indica las fechas de compromiso.';return;}
