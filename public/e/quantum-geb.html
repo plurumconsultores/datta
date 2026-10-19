@@ -14,13 +14,13 @@ var SUPABASE_URL = 'https://griozhufchnxpdpxmspd.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_2M-S4-vlgk_3pR90lmc6Zg_GOkKwMnc';
 var TABLA = 'respuestas_quantum';
 var FILIALES = ['Corporativo GEB','Enlaza','TGI','Cálidda','Contugas','Electro Dunas','Trecsa','Otra'];
-/* Mesas por color de PIN (confirmar colores con el equipo) */
+/* Mesas por color de post-it (los separadores que reciben en cada mesa) */
 var MESAS = [
-  {n:1, color:'Rosado',   hex:'#E8559A'},
-  {n:2, color:'Azul',     hex:'#2B63E8'},
-  {n:3, color:'Verde',    hex:'#5DAE22'},
-  {n:4, color:'Amarillo', hex:'#F5BE10'},
-  {n:5, color:'Naranja',  hex:'#F7883A'}];
+  {n:1, color:'Morado',  hex:'#6F63D2', bg:'radial-gradient(circle,#fff 0 1.6px,transparent 2px) 0 0/7px 7px,#6F63D2'},
+  {n:2, color:'Salmón',  hex:'#EE9583', bg:'repeating-linear-gradient(135deg,#EE9583 0 4px,#fff 4px 6px)'},
+  {n:3, color:'Lila',    hex:'#6E73C6', bg:'repeating-linear-gradient(0deg,#6E73C6 0 2.5px,#fff 2.5px 5px)'},
+  {n:4, color:'Mostaza', hex:'#E9A93A', bg:'radial-gradient(circle,#fff 0 1.8px,transparent 2.2px) 0 0/8px 8px,#E9A93A'},
+  {n:5, color:'Celeste', hex:'#7FC3EC', bg:'repeating-linear-gradient(135deg,#7FC3EC 0 5px,#fff 5px 6.5px)'}];
 var CONSULTA_MS = 5000;   // cada cuánto revisa qué sección está habilitada
 </script>
 <style>
@@ -252,7 +252,7 @@ function lider(n){return EST.lideres[n]||EST.lideres[String(n)]||null;}
 function soyLider(){var l=REG&&lider(REG.mesa);return !!(l&&l.pid===PID);}
 function cajaMesa(){
   if(!REG)return '';var m=mesaInfo(REG.mesa),l=lider(REG.mesa);
-  return '<div class="mesa-box"><span class="dot" style="background:'+m.hex+'"></span><div class="who"><b>'+esc(REG.nombre)+'</b><small>Mesa '+m.n+' · PIN '+esc(m.color)+' · '+esc(REG.filial)+'</small></div><div class="lider">'+(l?(l.pid===PID?'Eres líder':'Líder: '+esc(l.nombre.split(' ')[0])):'Sin líder')+'</div></div>';
+  return '<div class="mesa-box"><span class="dot" style="background:'+(m.bg||m.hex)+'"></span><div class="who"><b>'+esc(REG.nombre)+'</b><small>Mesa '+m.n+' · '+esc(m.color)+' · '+esc(REG.filial)+'</small></div><div class="lider">'+(l?(l.pid===PID?'Eres líder':'Líder: '+esc(l.nombre.split(' ')[0])):'Sin líder')+'</div></div>';
 }
 function estadoConexion(){return '<div class="estado'+(CONECTADO?'':' off')+'"><i></i>'+(CONECTADO?'Conectado a la sala':'Sin conexión · tus respuestas quedan guardadas en este celular')+'</div>';}
 function navVolver(){
@@ -277,7 +277,7 @@ R.registro=function(){
     '<label class="f">Cargo</label><input type="text" id="r_car" maxlength="80">'+
     '<label class="f">Género</label><div class="chips">'+opt('reg','genero','Mujer','Mujer','chip')+opt('reg','genero','Hombre','Hombre','chip')+opt('reg','genero','Prefiero no decirlo','Prefiero no decirlo','chip')+'</div>'+
     '<label class="f">Filial</label><select id="r_fil">'+o+'</select>'+
-    '<label class="f">Color de tu PIN · tu mesa</label><div class="pins">'+MESAS.map(function(m){return '<button type="button" class="pin" data-g="reg" data-k="mesa" data-v="'+m.n+'" onclick="elegir(this)"><i style="background:'+m.hex+'"></i>'+esc(m.color)+'<br><small style="font-weight:600;color:var(--suave)">Mesa '+m.n+'</small></button>';}).join('')+'</div>'+
+    '<label class="f">Color de tu post-it · tu mesa</label><div class="pins">'+MESAS.map(function(m){return '<button type="button" class="pin" data-g="reg" data-k="mesa" data-v="'+m.n+'" onclick="elegir(this)"><i style="background:'+(m.bg||m.hex)+'"></i>'+esc(m.color)+'<br><small style="font-weight:600;color:var(--suave)">Mesa '+m.n+'</small></button>';}).join('')+'</div>'+
     pie('Entrar a la sala')+'</div>');
   DRAFT_KEY='registro';restaurarBorrador();
 };
@@ -392,7 +392,7 @@ window.enviarForm=function(){
   var s=SEC[secIdx(REG?vistaActual():'registro')],err=document.getElementById('err');err.textContent='';
   var fila={actividad:actOf(s),momento:s.m||null,mesa:REG?REG.mesa:null,nombre:REG?REG.nombre:null,filial:REG?REG.filial:null,datos:{}},clave=s.k;
   if(s.k==='registro'){var n=val('r_nom'),c=val('r_car'),f=val('r_fil'),m=(SEL.reg||{}).mesa;
-    if(n.length<3){err.textContent='Escribe tu nombre.';return;}if(c.length<2){err.textContent='Escribe tu cargo.';return;}var gn=(SEL.reg||{}).genero;if(!gn){err.textContent='Selecciona tu género.';return;}if(!f){err.textContent='Selecciona tu filial.';return;}if(!m){err.textContent='Elige el color de tu PIN.';return;}
+    if(n.length<3){err.textContent='Escribe tu nombre.';return;}if(c.length<2){err.textContent='Escribe tu cargo.';return;}var gn=(SEL.reg||{}).genero;if(!gn){err.textContent='Selecciona tu género.';return;}if(!f){err.textContent='Selecciona tu filial.';return;}if(!m){err.textContent='Elige el color de tu post-it.';return;}
     fila={actividad:'registro',mesa:+m,nombre:n,filial:f,datos:{cargo:c,genero:gn}};}
   var integrantes=REG?miembrosMesa(REG.mesa).map(function(x){return x.nombre;}):[];
   if(s.tipo==='grupal'){fila.nombre=REG.nombre;fila.filial=null;fila.datos.integrantes=integrantes;fila.datos.filiales=miembrosMesa(REG.mesa).map(function(x){return x.filial;});}
