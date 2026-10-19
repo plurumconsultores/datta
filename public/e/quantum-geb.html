@@ -275,6 +275,7 @@ R.registro=function(){
   h('<div class="card">'+'<div class="kick">Bienvenida</div><h2>Regístrate una sola vez</h2><p class="muted">Tus datos se usan en todas las actividades del taller. Si se recarga la página o se cierra, vuelves al punto donde ibas.</p>'+
     '<label class="f">Nombre y apellido</label><input type="text" id="r_nom" maxlength="80" autocomplete="name">'+
     '<label class="f">Cargo</label><input type="text" id="r_car" maxlength="80">'+
+    '<label class="f">Género</label><div class="chips">'+opt('reg','genero','Mujer','Mujer','chip')+opt('reg','genero','Hombre','Hombre','chip')+opt('reg','genero','Prefiero no decirlo','Prefiero no decirlo','chip')+'</div>'+
     '<label class="f">Filial</label><select id="r_fil">'+o+'</select>'+
     '<label class="f">Color de tu PIN · tu mesa</label><div class="pins">'+MESAS.map(function(m){return '<button type="button" class="pin" data-g="reg" data-k="mesa" data-v="'+m.n+'" onclick="elegir(this)"><i style="background:'+m.hex+'"></i>'+esc(m.color)+'<br><small style="font-weight:600;color:var(--suave)">Mesa '+m.n+'</small></button>';}).join('')+'</div>'+
     pie('Entrar a la sala')+'</div>');
@@ -381,8 +382,8 @@ window.enviarForm=function(){
   var s=SEC[secIdx(REG?vistaActual():'registro')],err=document.getElementById('err');err.textContent='';
   var fila={actividad:actOf(s),momento:s.m||null,mesa:REG?REG.mesa:null,nombre:REG?REG.nombre:null,filial:REG?REG.filial:null,datos:{}},clave=s.k;
   if(s.k==='registro'){var n=val('r_nom'),c=val('r_car'),f=val('r_fil'),m=(SEL.reg||{}).mesa;
-    if(n.length<3){err.textContent='Escribe tu nombre.';return;}if(c.length<2){err.textContent='Escribe tu cargo.';return;}if(!f){err.textContent='Selecciona tu filial.';return;}if(!m){err.textContent='Elige el color de tu PIN.';return;}
-    fila={actividad:'registro',mesa:+m,nombre:n,filial:f,datos:{cargo:c}};}
+    if(n.length<3){err.textContent='Escribe tu nombre.';return;}if(c.length<2){err.textContent='Escribe tu cargo.';return;}var gn=(SEL.reg||{}).genero;if(!gn){err.textContent='Selecciona tu género.';return;}if(!f){err.textContent='Selecciona tu filial.';return;}if(!m){err.textContent='Elige el color de tu PIN.';return;}
+    fila={actividad:'registro',mesa:+m,nombre:n,filial:f,datos:{cargo:c,genero:gn}};}
   var integrantes=REG?miembrosMesa(REG.mesa).map(function(x){return x.nombre;}):[];
   if(s.tipo==='grupal'){fila.nombre=REG.nombre;fila.filial=null;fila.datos.integrantes=integrantes;fila.datos.filiales=miembrosMesa(REG.mesa).map(function(x){return x.filial;});}
   if(s.k==='conexion'){var fr=val('frase');if(fr.length<5){err.textContent='Escriban la frase común de la mesa.';return;}fila.datos.frase=fr;fila.datos.relatoria=val('rel');}
@@ -408,7 +409,7 @@ window.enviarForm=function(){
   if(s.k==='aprendizajes'){if(val('llevo').length<3){err.textContent='Escribe tu aprendizaje.';return;}fila.datos={llevo:val('llevo'),cargo:REG.cargo};}
   var bt=document.getElementById('go');bt.disabled=true;bt.textContent='Enviando…';
   enviar(fila).then(function(){
-    if(s.k==='registro'){REG={nombre:fila.nombre,cargo:fila.datos.cargo,filial:fila.filial,mesa:fila.mesa};ls('reg',REG);EST.miembros.push({pid:PID,nombre:REG.nombre,filial:REG.filial,cargo:REG.cargo,mesa:REG.mesa});ls('draft_registro',null);render(true);return;}
+    if(s.k==='registro'){REG={nombre:fila.nombre,cargo:fila.datos.cargo,genero:fila.datos.genero,filial:fila.filial,mesa:fila.mesa};ls('reg',REG);EST.miembros.push({pid:PID,nombre:REG.nombre,filial:REG.filial,cargo:REG.cargo,mesa:REG.mesa});ls('draft_registro',null);render(true);return;}
     ls('draft_'+clave,null);
     if(s.k==='core'){EST.grupales.push({a:'core',m:REG.mesa,c:fila.datos.comp});var done=EST.grupales.filter(function(g){return g.a==='core'&&g.m==REG.mesa;}).map(function(g){return g.c;});
       var next=CORE.findIndex(function(x){return done.indexOf(x.id)<0;});CI=next>=0?next:(done.indexOf('CIERRE')<0?5:CI);ls('core_tab',CI);
