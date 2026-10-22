@@ -56,7 +56,7 @@ export async function GET() {
   return json({
     respuestas: comps.error ? [] : (comps.data ?? []),
     acuerdos: acuerdos.error ? [] : (acuerdos.data ?? []),
-    esAdmin, esEquipo, avisos, version: '16-oct-B',
+    esAdmin, esEquipo, avisos, version: '21-oct-A',
   });
 }
 
