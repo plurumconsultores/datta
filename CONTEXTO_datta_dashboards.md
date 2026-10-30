@@ -292,3 +292,23 @@ Y el tablero pide los datos a su propia aplicación, sin llevar llaves dentro:
 
 `?resumen=1` devuelve conteos por pregunta (y el promedio de las escalas); sin ese
 parámetro devuelve las respuestas fila por fila, pedidas por páginas de 1.000.
+
+## Herramientas editables (oct 2026)
+
+Un tablero nativo puede guardar cambios hechos por sus usuarios, con historial. El primero
+es `herramienta-cambio-nexo-gasco` (Herramienta de Gestión del Cambio NEXO - Gasco).
+
+- Tablas `herramienta_estado` (un JSON por slug, con `version`) y `herramienta_historial`
+  (un registro por dato cambiado: usuario, fecha, nota, ruta, antes, después). Script:
+  `scripts/herramienta_editable.sql`. Sin políticas RLS abiertas.
+- API `app/api/herramienta/[slug]/route.ts`: GET devuelve estado + historial; POST recibe
+  `{ nota, cambios, semilla? }`. Permiso: quien ve el tablero (RLS de `dashboards`) puede
+  editarlo; después de esa comprobación lee y escribe el servidor con la llave secreta.
+- Motor `lib/herramienta.ts`: ops `set` / `agregar` / `borrar` sobre rutas con `#<_id>`.
+  Un `set` solo se aplica si el dato sigue valiendo lo que la persona vio; si no, vuelve
+  como conflicto (no se pisa el cambio de otro). Estado e historial se guardan juntos con
+  la función `herramienta_guardar` (control de versión; el servidor reintenta).
+- Mientras nadie guarda, el tablero muestra los datos embebidos en su HTML; el primer
+  guardado los manda como `semilla`. Subir de nuevo el HTML no borra lo guardado.
+- El iframe del visor no tiene `allow-modals`: los tableros no pueden usar `alert()` ni
+  `confirm()`; usan diálogos propios.
